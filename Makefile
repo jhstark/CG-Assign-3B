@@ -23,7 +23,7 @@ ifneq (, $(findstring CYGWIN, $(PLATFORM)))
 	CPPFLAGS = -DWIN32
 endif
 
-CC = g++
+CC = g++ --std=c++11
 EXE = assign3_part2
 OBJS = main.o shader.o Object.o Landscape.o
 

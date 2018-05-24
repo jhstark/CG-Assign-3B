@@ -7,7 +7,7 @@ void Object::printVertices(){
 	for (int j = 0 ; j < data.size() ; j++){
 		
 		std::cout << "Shape " << j << std::endl;
-		objShape shape = data.at(i);
+		objShape shape = data.at(j);
 		
 		std::cout << " -> Vertices:" << std::endl;
 		for (i=0;i<shape.Vertices.size();i=i+3){

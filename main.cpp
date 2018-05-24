@@ -14,8 +14,7 @@
 #include "worldGen/Landscape.hpp"
 #include "worldGen/Object.hpp"
 
-
-Landscape *ground = new Landscape(10);
+Object *ground = new Landscape(10);
 
 // Quick camera for now
 
@@ -254,15 +253,3 @@ int main(int argc, char** argv){
 	
 	return 0;
 }
-
-
-/*#include "worldGen/Landscape.hpp"
-
- int main(){
-
-	Landscape ground = Landscape(10);
-	
-	ground.printVertices();
-	
-	return 0;
-} */
