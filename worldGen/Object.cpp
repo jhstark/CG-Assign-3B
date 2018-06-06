@@ -1,6 +1,8 @@
 #include "Object.hpp"
 #include <iostream>
 #include <vector>
+#include <map>
+#include <glm/glm.hpp>
 
 void Object::printVertices(){
 	int i;
@@ -28,4 +30,201 @@ void Object::printVertices(){
 			std::cout << "\t" << shape.triangleCount << std::endl;
 		
 	}
+}
+
+// Returns the highest axis distance to scale by
+float Object::scale(){
+
+	float dist;
+	
+	float minX = objFile.minMax["min"].x;
+	float minY = objFile.minMax["min"].y;
+	float minZ = objFile.minMax["min"].z;
+	
+	float maxX = objFile.minMax["max"].x;
+	float maxY = objFile.minMax["max"].y;
+	float maxZ = objFile.minMax["max"].z;
+	
+	float distX = std::abs(maxX - minX);
+	float distY = std::abs(maxY - minY);
+	float distZ = std::abs(maxZ - minZ);
+	
+
+	// Return the largest distance
+	dist = distX;
+	
+	if (distY > dist){
+		dist = distY;
+	}	
+	
+	if (distZ > dist){
+		dist = distZ;
+	}	
+	
+	return dist;
+	
+}
+
+std::map< std::string, glm::vec3 > Object::findMinMax(){
+
+	std::map< std::string,glm::vec3 > minMax;
+	
+	float x,y,z;
+	glm::vec3 min = glm::vec3(0.0f);
+	glm::vec3 max = glm::vec3(0.0f);
+	
+	for (int j=0;j<data.size(); j++){
+
+		std::vector<float> Vertices = data.at(j).Vertices;
+
+		for (int i=0;i<Vertices.size();i = i + 3){	
+
+			x = Vertices.at(i);
+			y = Vertices.at(i + 1);
+			z = Vertices.at(i + 2);
+			
+			if ( j == 0 && i == 0 ){
+				min.x = x;
+				min.y = y;
+				min.z = z;
+				
+				max.x = x;
+				max.y = y;
+				max.z = z;
+			}
+			// Assign the min and max values	
+			if (x < min.x){
+				min.x = x;
+			}
+			if (x > max.x){
+				max.x = x;
+			}
+			
+			if (y < min.y){
+				min.y = y;
+			}
+			if (y > max.y){
+				max.y = y;
+			}
+			
+			if (z < min.z){
+				min.z = z;
+			}
+			if (z > max.z){
+				max.z = z;
+			}
+			
+		}
+	}
+	
+	minMax["min"] = min;
+	minMax["max"] = max;
+	
+	return minMax;
+	
+}
+
+void Object::loadFile( std::string input ){
+	std::cout << input << std::endl;
+	std::string err;
+	
+	std::string base_dir = "";
+	
+	// Thanks to https://github.com/syoyo/tinyobjloader/blob/master/examples/viewer/viewer.cc
+	if (input.find_last_of("/\\") != std::string::npos){
+		base_dir = input.substr(0, input.find_last_of("/\\"));
+	}
+	
+	if (base_dir.empty()) {
+		base_dir = ".";
+	}
+	#ifdef _WIN32
+		base_dir += "\\";
+	#else
+		base_dir += "/";
+	#endif
+	
+	bool ret = tinyobj::LoadObj(&objFile.attrib, &objFile.shapes, &objFile.materials, &err, input.c_str(), base_dir.c_str());
+	
+	if (!err.empty()){
+		std::cerr << err << std::endl;
+	}
+	
+	if (!ret){
+		exit(1);
+	}
+	
+	loadShapes();
+
+}
+
+void Object::loadShapes(){
+	for (size_t s = 0; s < objFile.shapes.size(); s++) {
+		
+		objShape shape;
+		int triangleCount = 0;
+		
+		// Loop over faces(polygon)
+		size_t index_offset = 0;
+		
+		for (size_t f = 0; f < objFile.shapes[s].mesh.num_face_vertices.size(); f++) {
+			
+			int fv = objFile.shapes[s].mesh.num_face_vertices[f];
+		
+			// Loop over vertices in the face.
+			for (size_t v = 0; v < fv; v++) {
+
+				tinyobj::index_t idx = objFile.shapes[s].mesh.indices[index_offset + v];
+				
+				tinyobj::real_t vx = objFile.attrib.vertices[3*idx.vertex_index+0];
+				tinyobj::real_t vy = objFile.attrib.vertices[3*idx.vertex_index+1];
+				tinyobj::real_t vz = objFile.attrib.vertices[3*idx.vertex_index+2];
+				
+				shape.Vertices.push_back(vx);
+				shape.Vertices.push_back(vy);
+				shape.Vertices.push_back(vz);
+				
+				tinyobj::real_t nx , ny , nz = 0;
+				
+				if (objFile.attrib.normals.size() > 0){
+					nx = objFile.attrib.normals[3*idx.normal_index+0];
+					ny = objFile.attrib.normals[3*idx.normal_index+1];
+					nz = objFile.attrib.normals[3*idx.normal_index+2];
+				}
+				
+				shape.Normals.push_back(nx);
+				shape.Normals.push_back(ny);
+				shape.Normals.push_back(nz);
+
+				tinyobj::real_t tx,ty = 0;
+
+				if (objFile.attrib.texcoords.size() > 0){
+
+					tx = objFile.attrib.texcoords[2*idx.texcoord_index+0];
+					ty = objFile.attrib.texcoords[2*idx.texcoord_index+1];
+				
+				}
+
+				shape.TexCoord.push_back(tx);
+				shape.TexCoord.push_back(ty);
+			
+				// Keep track of the number of primitives per shape for drawing
+				triangleCount++;
+			}
+			// per-face material
+			shape.matId = objFile.shapes[s].mesh.material_ids[f];
+			
+			index_offset += fv;
+			
+		}
+		
+		shape.triangleCount = triangleCount;
+
+		// Send the shape to the global var
+		data.push_back(shape);
+		
+	}
+
+	// Find and store the minimum and maximum vertices for normalisation
+	objFile.minMax = findMinMax();
 }

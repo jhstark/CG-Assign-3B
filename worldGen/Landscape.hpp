@@ -1,21 +1,21 @@
 #ifndef _LANDSCAPE_HPP
 #define _LANDSCAPE_HPP
 
+#include "Object.hpp"
+
 #include <vector>
 #include <map>
 #include <iostream>
 #include <glm/glm.hpp>
 
-#include "Object.hpp"
-
 class Landscape:public Object{
 	
 	public:
-		Landscape(int size);
+		Landscape(float size);
 		
 	private:
 		// Functions
-		void generateVertices(int);
+		void generateGround(std::string,float,glm::vec3);
 		std::vector<float> findNormals(std::vector<float>);
 };
 

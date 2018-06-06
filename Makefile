@@ -25,7 +25,8 @@ endif
 
 CC = g++ --std=c++11
 EXE = assign3_part2
-OBJS = main.o shader.o Object.o Landscape.o
+OBJS = main.o stb_image.o tiny_obj_loader.o shader.o Object.o Landscape.o Plane.o
+libDir = libraries/
 
 .PHONY:  clean
 test: ; $(info $$var is [$(PLATFORM)])echo Hello world
@@ -36,14 +37,24 @@ $(EXE): $(OBJS)
 
 main.o : main.cpp $(LINK)
 	$(CC) $(CPPFLAGS) -c main.cpp
+	
+stb_image.o : $(libDir)stb_image.cpp
+	$(CC) -c -o stb_image.o $(libDir)stb_image.cpp
+	
+tiny_obj_loader.o : $(libDir)tiny_obj_loader.cpp
+	$(CC) -c -o tiny_obj_loader.o $(libDir)tiny_obj_loader.cpp
 
 shader.o : shader.cpp shader.hpp
 	$(CC) $(CPPFLAGS) -c shader.cpp
 	
 Object.o : worldGen/Object.cpp worldGen/Object.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Object.cpp
+	
 Landscape.o : worldGen/Landscape.cpp worldGen/Landscape.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Landscape.cpp
+	
+Plane.o : worldGen/Plane.cpp worldGen/Plane.hpp
+	$(CC) $(CPPFLAGS) -c worldGen/Plane.cpp
 	
 clean:
 	rm -f *.o run$(EXT)

@@ -8,7 +8,8 @@ in vec3 normal;
 out vec4 fragColour;
 
 void main(void){
-	fragColour = vec4(normal.x , fragCol.y , fragCol.z , 1.0);
+	float k = fragCol.z;
+	fragColour = vec4(normal.x , normal.y , normal.z, k+0.9);
 	/* if (colourMode == 1){
 		fragColour = vec4(normal.x , normal.y , normal.z , 1.0);
 	}
