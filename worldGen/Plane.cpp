@@ -10,7 +10,7 @@ Plane::Plane(){
 	v = 1.0;
 	h = 1.0;
 	
-	resetPos(0.0d);
+	resetPos(0.0);
 }
 
 void Plane::resetPos(double dt){
