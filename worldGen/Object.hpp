@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <glm/glm.hpp>
+#include "../openglH.h"
 
 class Object{
 	
@@ -33,12 +33,16 @@ class Object{
 		
 		std::vector< objShape > data;
 		objectData objFile;
+		std::map<std::string, GLuint> textures;
+		std::string base_dir = "";
 		
 		virtual void printVertices();
 		float scale();
-		std::map< std::string, glm::vec3 > findMinMax();
+		void findMinMax();
 		virtual void loadFile( std::string input );
 		void loadShapes();
+		void loadTexture();
+		bool FileExists(const std::string& abs_filename);
 };
 
 #endif

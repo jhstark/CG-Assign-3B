@@ -39,6 +39,7 @@ void loadShaders(){
 	// Load shader and vertex data
 	
 	programIdMap["debug"] = LoadShaders("shaders/debug_inspect.vert", "shaders/debug_inspect.frag");
+	programIdMap["main"] = LoadShaders("shaders/main.vert", "shaders/main.frag");
 	
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
@@ -172,7 +173,7 @@ void renderGround(){
 }
 void renderPlane(double dt){
 	
-	int programId = programIdMap["debug"];
+	int programId = programIdMap["main"];
 	
 	for (int i=0;i<plane->data.size();i++){
 		
@@ -180,13 +181,28 @@ void renderPlane(double dt){
 		glUseProgram( programId );
 		glBindVertexArray(vaoHandle);
 		
+		int texHandle = glGetUniformLocation(programId, "texMap");
+		
 		// Assign the view matrix
-		int viewHandle = glGetUniformLocation(programId, "view");
+		int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+		int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+		int normHandle = glGetUniformLocation(programId, "normalMatrix");
+		
+		if (viewHandle == -1 || mvHandle == -1 ){
+			std::cout << "Can't find uniforms view model" << std::endl;
+			std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
+			exit(1);
+		}
+		
+		std::string diffuse_texname = plane->objFile.materials[0].diffuse_texname;
+		if (plane->textures.find(diffuse_texname) != plane->textures.end()) {
+			glBindTexture(GL_TEXTURE_2D, plane->textures[diffuse_texname]);
+		}
+		glUniform1i(texHandle,0);
+		
 		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
 		
 		// Assign the model view matrix
-		int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
-		int normHandle = glGetUniformLocation(programId, "normalMatrix");
 		
 		glm::mat4 mvMatrix;
 		glm::mat3 normMatrix;
@@ -206,7 +222,6 @@ void renderPlane(double dt){
 		mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 1.0 , 0.0)); 
 		mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 0.0 , -0.5)); 
 		
-		
 		mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
 		
 		glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
@@ -214,17 +229,7 @@ void renderPlane(double dt){
 		// Calculate the normal transformation based on the current view and the model view
 		normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
 		glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-		
-		// Assign the colour value
-		int diffuseHandle = glGetUniformLocation(programId, "Kd");
-		
-		if ( diffuseHandle == -1 ){
-			std::cout << "Can't find uniforms colour diffuse" << std::endl;
-			exit(1);
-		}
-		
-		glUniform3f(diffuseHandle, 0.5 , 1.0 , 0.5);
-			
+					
 		int vertexCount = 3 * ( plane->data.at(i).triangleCount );
 		glDrawArrays(GL_TRIANGLES,0,vertexCount);
 		
@@ -338,11 +343,11 @@ int main(int argc, char** argv){
 // Load in objects
 	loadVao(ground);
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
-	//plane->loadFile("models/testbarrel/Barrel02.obj");
+	//plane->loadFile("models/btest/Barrel02.obj");
+	loadVao(plane);
 	
 	//plane->printVertices();
 	
-	loadVao(plane);
 	
 // Initialise callbacks
 	glfwSetKeyCallback(window, key_callback);

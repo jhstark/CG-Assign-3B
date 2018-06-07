@@ -47,7 +47,7 @@ tiny_obj_loader.o : $(libDir)tiny_obj_loader.cpp
 shader.o : shader.cpp shader.hpp
 	$(CC) $(CPPFLAGS) -c shader.cpp
 	
-Object.o : worldGen/Object.cpp worldGen/Object.hpp
+Object.o : worldGen/Object.cpp worldGen/Object.hpp Landscape.o Plane.o
 	$(CC) $(CPPFLAGS) -c worldGen/Object.cpp
 	
 Landscape.o : worldGen/Landscape.cpp worldGen/Landscape.hpp

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <glm/glm.hpp>
+#include "../openglH.h"
 
 void Object::printVertices(){
 	int i;
@@ -65,7 +65,7 @@ float Object::scale(){
 	
 }
 
-std::map< std::string, glm::vec3 > Object::findMinMax(){
+void Object::findMinMax(){
 
 	std::map< std::string,glm::vec3 > minMax;
 	
@@ -120,15 +120,13 @@ std::map< std::string, glm::vec3 > Object::findMinMax(){
 	minMax["min"] = min;
 	minMax["max"] = max;
 	
-	return minMax;
+	objFile.minMax = minMax;
 	
 }
 
 void Object::loadFile( std::string input ){
 	std::cout << input << std::endl;
 	std::string err;
-	
-	std::string base_dir = "";
 	
 	// Thanks to https://github.com/syoyo/tinyobjloader/blob/master/examples/viewer/viewer.cc
 	if (input.find_last_of("/\\") != std::string::npos){
@@ -155,7 +153,76 @@ void Object::loadFile( std::string input ){
 	}
 	
 	loadShapes();
+	// Find and store the minimum and maximum vertices for normalisation
+	findMinMax();
+	loadTexture();
+}
 
+bool Object::FileExists(const std::string& abs_filename) {
+  bool ret;
+  FILE* fp = fopen(abs_filename.c_str(), "rb");
+  if (fp) {
+    ret = true;
+    fclose(fp);
+  } else {
+    ret = false;
+  }
+
+  return ret;
+}
+
+void Object::loadTexture(){
+	
+	for (size_t m = 0; m < objFile.materials.size(); m++) {
+      tinyobj::material_t* mp = &objFile.materials[m];
+
+      if (mp->diffuse_texname.length() > 0) {
+        // Only load the texture if it is not already loaded
+        if (textures.find(mp->diffuse_texname) == textures.end()) {
+          GLuint texture_id;
+          int w, h;
+          int comp;
+
+          std::string texture_filename = mp->diffuse_texname;
+          if (!FileExists(texture_filename)) {
+            // Append base dir.
+            texture_filename = base_dir + mp->diffuse_texname;
+            if (!FileExists(texture_filename)) {
+              std::cerr << "Unable to find file: " << mp->diffuse_texname
+                        << std::endl;
+              exit(1);
+            }
+          }
+
+          unsigned char* image =
+              stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+          if (!image) {
+            std::cerr << "Unable to load texture: " << texture_filename
+                      << std::endl;
+            exit(1);
+          }
+          std::cout << "Loaded texture: " << texture_filename << ", w = " << w
+                    << ", h = " << h << ", comp = " << comp << std::endl;
+
+          glGenTextures(1, &texture_id);
+          glBindTexture(GL_TEXTURE_2D, texture_id);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+          if (comp == 3) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+                         GL_UNSIGNED_BYTE, image);
+          } else if (comp == 4) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+                         GL_UNSIGNED_BYTE, image);
+          } else {
+            assert(0);  // TODO
+          }
+          glBindTexture(GL_TEXTURE_2D, 0);
+          stbi_image_free(image);
+          textures.insert(std::make_pair(mp->diffuse_texname, texture_id));
+        }
+      }
+	}
 }
 
 void Object::loadShapes(){
@@ -224,7 +291,4 @@ void Object::loadShapes(){
 		data.push_back(shape);
 		
 	}
-
-	// Find and store the minimum and maximum vertices for normalisation
-	objFile.minMax = findMinMax();
 }
