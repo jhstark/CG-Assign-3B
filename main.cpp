@@ -55,43 +55,46 @@ void loadShaders(){
 int loadVao(Object * object){
 	//
 	//std::vector<unsigned int> vaoVect;
-	std::vector< Object::objShape > Shapes = object->data;
 	// Store each shape on the VAO buffer
-	for (int j=0;j<Shapes.size(); j++){
-		Object::objShape shape = Shapes.at(j);
-		unsigned int vH;
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=object->data.begin(); item!=object->data.end(); ++item){
 		
-		glGenVertexArrays(1, &vH);
-		glBindVertexArray(vH);
+		std::vector< Object::objShape > Shapes = item->second;
+		
+		for (int j=0;j<Shapes.size(); j++){
+			Object::objShape shape = Shapes.at(j);
+			unsigned int vH;
+			
+			glGenVertexArrays(1, &vH);
+			glBindVertexArray(vH);
 
-		unsigned int buffer[3];
-		glGenBuffers(3, buffer);
-		
-		// Set vertex attributes
-		glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
-		glBufferData(GL_ARRAY_BUFFER, shape.Vertices.size() * sizeof(float), &shape.Vertices[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
-		
-		// Set normal attributes
-		glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
-		glBufferData(GL_ARRAY_BUFFER, shape.Normals.size() * sizeof(float), &shape.Normals[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
+			unsigned int buffer[3];
+			glGenBuffers(3, buffer);
+			
+			// Set vertex attributes
+			glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+			glBufferData(GL_ARRAY_BUFFER, shape.Vertices.size() * sizeof(float), &shape.Vertices[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
+			
+			// Set normal attributes
+			glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
+			glBufferData(GL_ARRAY_BUFFER, shape.Normals.size() * sizeof(float), &shape.Normals[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
 
-		// Texture attributes
-		glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
-		glBufferData(GL_ARRAY_BUFFER, shape.TexCoord.size() * sizeof(float), &shape.TexCoord[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, VALS_PER_TEX, GL_FLOAT, GL_FALSE, 0, 0);
-					 
-		// Un-bind
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-		// Update the shape with the vao handle
-		object->data.at(j).vaoHandle = vH;
-    }
-	
+			// Texture attributes
+			glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
+			glBufferData(GL_ARRAY_BUFFER, shape.TexCoord.size() * sizeof(float), &shape.TexCoord[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, VALS_PER_TEX, GL_FLOAT, GL_FALSE, 0, 0);
+						 
+			// Un-bind
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+			// Update the shape with the vao handle
+			object->data[item->first].at(j).vaoHandle = vH;
+		}
+	}
 	return 1;
 	
 }
@@ -129,110 +132,121 @@ void renderGround(){
 	
 	int programId = programIdMap["debug"];
 	
-	for (int i=0;i<ground->data.size();i++){
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=ground->data.begin(); item!=ground->data.end(); ++item){
 		
-		unsigned int vaoHandle = ground->data.at(i).vaoHandle;
-		glUseProgram( programId );
-		glBindVertexArray(vaoHandle);
+		std::vector< Object::objShape > Shapes = item->second;
 		
-		// Assign the view matrix
-		int viewHandle = glGetUniformLocation(programId, "view");
-		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
-		
-		// Assign the model view matrix
-		int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
-		int normHandle = glGetUniformLocation(programId, "normalMatrix");
-		
-		glm::mat4 mvMatrix;
-		glm::mat3 normMatrix;
-		
-		mvMatrix = glm::scale(mvMatrix, glm::vec3(1.0)); 
-		glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
-		
-		// Calculate the normal transformation based on the current view and the model view
-		normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
-		glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-		
-		// Assign the colour value
-		int diffuseHandle = glGetUniformLocation(programId, "Kd");
-		
-		if ( diffuseHandle == -1 ){
-			std::cout << "Can't find uniforms colour diffuse" << std::endl;
-			exit(1);
-		}
-		
-		glUniform3f(diffuseHandle, 0.5 , 1.0 , 0.5);
+		for (int i=0;i<Shapes.size();i++){
 			
-		int vertexCount = 3 * ( ground->data.at(i).triangleCount );
-		glDrawArrays(GL_TRIANGLES,0,vertexCount);
-		
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glUseProgram( programId );
+			glBindVertexArray(vaoHandle);
+			
+			// Assign the view matrix
+			int viewHandle = glGetUniformLocation(programId, "view");
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
+			
+			// Assign the model view matrix
+			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+			int normHandle = glGetUniformLocation(programId, "normalMatrix");
+			
+			glm::mat4 mvMatrix;
+			glm::mat3 normMatrix;
+			
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(1.0)); 
+			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+			
+			// Calculate the normal transformation based on the current view and the model view
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
+			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+			
+			// Assign the colour value
+			int diffuseHandle = glGetUniformLocation(programId, "Kd");
+			
+			if ( diffuseHandle == -1 ){
+				std::cout << "Can't find uniforms colour diffuse" << std::endl;
+				exit(1);
+			}
+			
+			glUniform3f(diffuseHandle, 0.5 , 1.0 , 0.5);
+				
+			int vertexCount = 3 * ( Shapes.at(i).triangleCount );
+			glDrawArrays(GL_TRIANGLES,0,vertexCount);
+			
+		}
 	}
-	
 	glBindVertexArray(0);
 	
 }
 void renderPlane(double dt){
 	
 	int programId = programIdMap["main"];
-	
-	for (int i=0;i<plane->data.size();i++){
+	int vertexCount = 0;
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=plane->data.begin(); item!=plane->data.end(); ++item){
 		
-		unsigned int vaoHandle = plane->data.at(i).vaoHandle;
-		glUseProgram( programId );
-		glBindVertexArray(vaoHandle);
+		std::vector< Object::objShape > Shapes = item->second;
 		
-		int texHandle = glGetUniformLocation(programId, "texMap");
-		
-		// Assign the view matrix
-		int viewHandle = glGetUniformLocation(programId, "viewMatrix");
-		int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
-		int normHandle = glGetUniformLocation(programId, "normalMatrix");
-		
-		if (viewHandle == -1 || mvHandle == -1 ){
-			std::cout << "Can't find uniforms view model" << std::endl;
-			std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
-			exit(1);
-		}
-		
-		std::string diffuse_texname = plane->objFile.materials[0].diffuse_texname;
+			
+		std::string diffuse_texname = item->first;
 		if (plane->textures.find(diffuse_texname) != plane->textures.end()) {
 			glBindTexture(GL_TEXTURE_2D, plane->textures[diffuse_texname]);
 		}
-		glUniform1i(texHandle,0);
 		
-		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
-		
-		// Assign the model view matrix
-		
-		glm::mat4 mvMatrix;
-		glm::mat3 normMatrix;
-		
-		// Calculate the model scale and normal transformation matrices
-		float screenScale = 0.8; // percentage of window object should take up
-		float scaleMultiplier = screenScale / ( plane->scale() );
-		
-		
-		plane->updatePos(dt);
-		
-		glm::vec3 pos = plane->getPos();
-		
-		float ori = plane->getOrientation();
-		
-		mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
-		mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 1.0 , 0.0)); 
-		mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 0.0 , -0.5)); 
-		
-		mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
-		
-		glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
-		
-		// Calculate the normal transformation based on the current view and the model view
-		normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
-		glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-					
-		int vertexCount = 3 * ( plane->data.at(i).triangleCount );
+		for (int i=0;i<Shapes.size();i++){
+			
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glUseProgram( programId );
+			glBindVertexArray(vaoHandle);
+			
+			int texHandle = glGetUniformLocation(programId, "texMap");
+			
+			// Assign the view matrix
+			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+			int normHandle = glGetUniformLocation(programId, "normalMatrix");
+			
+			if (viewHandle == -1 || mvHandle == -1 ){
+				std::cout << "Can't find uniforms view model" << std::endl;
+				std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
+				exit(1);
+			}
+			
+			glUniform1i(texHandle,0);
+			
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
+			
+			// Assign the model view matrix
+			
+			glm::mat4 mvMatrix;
+			glm::mat3 normMatrix;
+			
+			// Calculate the model scale and normal transformation matrices
+			float screenScale = 0.8; // percentage of window object should take up
+			float scaleMultiplier = screenScale / ( plane->scale() );
+			
+			
+			plane->updatePos(dt);
+			
+			glm::vec3 pos = plane->getPos();
+			
+			float ori = plane->getOrientation();
+			
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
+			mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 1.0 , 0.0)); 
+			mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 0.0 , -0.5)); 
+			
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
+			
+			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+			
+			// Calculate the normal transformation based on the current view and the model view
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
+			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+						
+			vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
+			
+		}
 		glDrawArrays(GL_TRIANGLES,0,vertexCount);
-		
 	}
 
 	glBindVertexArray(0);

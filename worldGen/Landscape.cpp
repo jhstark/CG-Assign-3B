@@ -82,7 +82,7 @@ void Landscape::generateGround(std::string type , float s, glm::vec3 l){
 	landscape.TexCoord = TexCoord;
 	landscape.triangleCount = Vertices.size() / ( 3 * 3 );
 	
-	data.push_back(landscape);
+	data["none"].push_back(landscape);
 	
 }
 

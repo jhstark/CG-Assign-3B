@@ -6,29 +6,33 @@
 
 void Object::printVertices(){
 	int i;
-	for (int j = 0 ; j < data.size() ; j++){
-		
-		std::cout << "Shape " << j << std::endl;
-		objShape shape = data.at(j);
-		
-		std::cout << " -> Vertices:" << std::endl;
-		for (i=0;i<shape.Vertices.size();i=i+3){
-			std::cout << "\t(" << shape.Vertices.at(i) << "," << shape.Vertices.at(i+1) << "," << shape.Vertices.at(i+2) << ")" << std::endl;
+	
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=data.begin(); item!=data.end(); ++item){
+		std::vector< Object::objShape > Shapes = item->second;	
+		for (int j = 0 ; j < Shapes.size() ; j++){
+			
+			std::cout << "Shape " << j << std::endl;
+			objShape shape = Shapes.at(j);
+			
+			std::cout << " -> Vertices:" << std::endl;
+			for (i=0;i<shape.Vertices.size();i=i+3){
+				std::cout << "\t(" << shape.Vertices.at(i) << "," << shape.Vertices.at(i+1) << "," << shape.Vertices.at(i+2) << ")" << std::endl;
+			}
+			
+			std::cout << " -> Normals:" << std::endl;
+			for (i=0;i<shape.Normals.size();i=i+3){
+				std::cout << "\t(" << shape.Normals.at(i) << "," << shape.Normals.at(i+1) << "," << shape.Normals.at(i+2) << ")" << std::endl;
+			}
+			
+			std::cout << " -> TexCoord:" << std::endl;
+			for (i=0;i<shape.TexCoord.size();i=i+2){
+				std::cout << "\t(" << shape.TexCoord.at(i) << "," << shape.TexCoord.at(i+1) << ")" << std::endl;
+			}
+			
+			std::cout << " -> Triangle Count:" << std::endl;
+				std::cout << "\t" << shape.triangleCount << std::endl;
+			
 		}
-		
-		std::cout << " -> Normals:" << std::endl;
-		for (i=0;i<shape.Normals.size();i=i+3){
-			std::cout << "\t(" << shape.Normals.at(i) << "," << shape.Normals.at(i+1) << "," << shape.Normals.at(i+2) << ")" << std::endl;
-		}
-		
-		std::cout << " -> TexCoord:" << std::endl;
-		for (i=0;i<shape.TexCoord.size();i=i+2){
-			std::cout << "\t(" << shape.TexCoord.at(i) << "," << shape.TexCoord.at(i+1) << ")" << std::endl;
-		}
-		
-		std::cout << " -> Triangle Count:" << std::endl;
-			std::cout << "\t" << shape.triangleCount << std::endl;
-		
 	}
 }
 
@@ -73,47 +77,51 @@ void Object::findMinMax(){
 	glm::vec3 min = glm::vec3(0.0f);
 	glm::vec3 max = glm::vec3(0.0f);
 	
-	for (int j=0;j<data.size(); j++){
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=data.begin(); item!=data.end(); ++item){
+		
+		std::vector< Object::objShape > Shapes = item->second;	
+		for (int j=0;j<Shapes.size(); j++){
 
-		std::vector<float> Vertices = data.at(j).Vertices;
+			std::vector<float> Vertices = Shapes.at(j).Vertices;
 
-		for (int i=0;i<Vertices.size();i = i + 3){	
+			for (int i=0;i<Vertices.size();i = i + 3){	
 
-			x = Vertices.at(i);
-			y = Vertices.at(i + 1);
-			z = Vertices.at(i + 2);
-			
-			if ( j == 0 && i == 0 ){
-				min.x = x;
-				min.y = y;
-				min.z = z;
+				x = Vertices.at(i);
+				y = Vertices.at(i + 1);
+				z = Vertices.at(i + 2);
 				
-				max.x = x;
-				max.y = y;
-				max.z = z;
+				if ( j == 0 && i == 0 ){
+					min.x = x;
+					min.y = y;
+					min.z = z;
+					
+					max.x = x;
+					max.y = y;
+					max.z = z;
+				}
+				// Assign the min and max values	
+				if (x < min.x){
+					min.x = x;
+				}
+				if (x > max.x){
+					max.x = x;
+				}
+				
+				if (y < min.y){
+					min.y = y;
+				}
+				if (y > max.y){
+					max.y = y;
+				}
+				
+				if (z < min.z){
+					min.z = z;
+				}
+				if (z > max.z){
+					max.z = z;
+				}
+				
 			}
-			// Assign the min and max values	
-			if (x < min.x){
-				min.x = x;
-			}
-			if (x > max.x){
-				max.x = x;
-			}
-			
-			if (y < min.y){
-				min.y = y;
-			}
-			if (y > max.y){
-				max.y = y;
-			}
-			
-			if (z < min.z){
-				min.z = z;
-			}
-			if (z > max.z){
-				max.z = z;
-			}
-			
 		}
 	}
 	
@@ -226,6 +234,7 @@ void Object::loadTexture(){
 }
 
 void Object::loadShapes(){
+	
 	for (size_t s = 0; s < objFile.shapes.size(); s++) {
 		
 		objShape shape;
@@ -233,11 +242,29 @@ void Object::loadShapes(){
 		
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
-		
+		std::string lastTexName;
+		std::string texName;
 		for (size_t f = 0; f < objFile.shapes[s].mesh.num_face_vertices.size(); f++) {
 			
 			int fv = objFile.shapes[s].mesh.num_face_vertices[f];
+			
+			// per-face material
+			int materialId = objFile.shapes[s].mesh.material_ids[f];
+			
+			texName = objFile.materials[materialId].diffuse_texname;
+			
+			// If the material changes this will treat it as a new shape
+			if (f>0 && lastTexName != texName){
 		
+				shape.triangleCount = triangleCount;
+				triangleCount = 0;
+				// Send the shape to the global var
+				data[lastTexName].push_back(shape);
+				
+				// Reset shape
+				shape = emptyObjShape;
+			}
+			
 			// Loop over vertices in the face.
 			for (size_t v = 0; v < fv; v++) {
 
@@ -278,17 +305,19 @@ void Object::loadShapes(){
 				// Keep track of the number of primitives per shape for drawing
 				triangleCount++;
 			}
-			// per-face material
-			shape.matId = objFile.shapes[s].mesh.material_ids[f];
+			
+			
+			shape.matId.push_back(materialId);
+			
 			
 			index_offset += fv;
-			
+			lastTexName = texName;
 		}
 		
 		shape.triangleCount = triangleCount;
 
 		// Send the shape to the global var
-		data.push_back(shape);
+		data[texName].push_back(shape);
 		
 	}
 }

@@ -19,7 +19,7 @@ class Object{
 			std::vector<float> TexCoord;
 			unsigned int vaoHandle;
 			int triangleCount;
-			int matId;
+			std::vector<int> matId;
 		};
 		
 		// Overarching struct for obj files
@@ -31,8 +31,10 @@ class Object{
 			std::map< std::string,glm::vec3 > minMax;
 		};
 		
-		std::vector< objShape > data;
+		std::map< std::string,std::vector< objShape > > data;
 		objectData objFile;
+		objShape emptyObjShape;
+		
 		std::map<std::string, GLuint> textures;
 		std::string base_dir = "";
 		
