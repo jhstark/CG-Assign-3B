@@ -22,7 +22,7 @@
 
 Camera *camera = new Camera();
 
-Skybox *skybox = new Skybox();
+//Skybox *skybox = new Skybox();
 Landscape *ground = new Landscape( 0.5 );
 Plane *plane = new Plane();
 
@@ -255,7 +255,7 @@ void renderPlane(double dt){
 
 	glBindVertexArray(0);
 }
-
+/*
 void renderSkyBox(){
 	
 	glDepthMask(GL_FALSE);
@@ -283,14 +283,14 @@ void renderSkyBox(){
 	glDepthMask(GL_TRUE);
 	
 }
-
+*/
 
 void render( double dt ){
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
 	
-	renderSkyBox();
+	//renderSkyBox();
 	renderGround();
 	renderPlane(dt);
 	
@@ -416,7 +416,7 @@ int main(int argc, char** argv){
 	loadShaders();
 
 // Load in objects
-	loadVao(skybox);
+//	loadVao(skybox);
 	loadVao(ground);
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
