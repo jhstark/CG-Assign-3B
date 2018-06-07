@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "../openglH.h"
+#include "../libraries/openglH.h"
 
 void Object::printVertices(){
 	int i;
@@ -76,7 +76,7 @@ void Object::findMinMax(){
 	float x,y,z;
 	glm::vec3 min = glm::vec3(0.0f);
 	glm::vec3 max = glm::vec3(0.0f);
-	
+	int first = true;
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=data.begin(); item!=data.end(); ++item){
 		
 		std::vector< Object::objShape > Shapes = item->second;	
@@ -90,7 +90,7 @@ void Object::findMinMax(){
 				y = Vertices.at(i + 1);
 				z = Vertices.at(i + 2);
 				
-				if ( j == 0 && i == 0 ){
+				if ( first ){
 					min.x = x;
 					min.y = y;
 					min.z = z;
@@ -98,6 +98,7 @@ void Object::findMinMax(){
 					max.x = x;
 					max.y = y;
 					max.z = z;
+					first = false;
 				}
 				// Assign the min and max values	
 				if (x < min.x){
@@ -181,6 +182,7 @@ bool Object::FileExists(const std::string& abs_filename) {
 
 void Object::loadTexture(){
 	
+	
 	for (size_t m = 0; m < objFile.materials.size(); m++) {
       tinyobj::material_t* mp = &objFile.materials[m];
 
@@ -214,6 +216,9 @@ void Object::loadTexture(){
 
           glGenTextures(1, &texture_id);
           glBindTexture(GL_TEXTURE_2D, texture_id);
+		  
+		std::cout << "Bound "<< texture_filename <<" to " << texture_id << std::endl;
+		
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
           if (comp == 3) {

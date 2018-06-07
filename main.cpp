@@ -8,27 +8,26 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "openglH.h"
+#include "libraries/openglH.h"
 #include "constants.h"
 
+#include "Camera.hpp"
 #include "worldGen/Object.hpp"
+#include "worldGen/Skybox.hpp"
 #include "worldGen/Plane.hpp"
 #include "worldGen/Landscape.hpp"
 
 // Load the objects in as global variables
 // NOTE: if you can think of a better way to do this for the render please do it!
 
+Camera *camera = new Camera();
+
+Skybox *skybox = new Skybox();
 Landscape *ground = new Landscape( 0.5 );
 Plane *plane = new Plane();
 
-// Quick camera for now
 
-glm::vec3 initEye(0.0f , 0.5f , 2.0f);
-glm::vec3 at(0.0f, 0.0f, 0.0f);
-glm::vec3 up(0.0f, 1.0f, 0.0f);
-
-glm::mat4 viewMtx = glm::lookAt(initEye, at, up);
-
+std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
 
  ----  Loading functions  ----
@@ -40,6 +39,7 @@ void loadShaders(){
 	
 	programIdMap["debug"] = LoadShaders("shaders/debug_inspect.vert", "shaders/debug_inspect.frag");
 	programIdMap["main"] = LoadShaders("shaders/main.vert", "shaders/main.frag");
+	programIdMap["skybox"] = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
 	
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
@@ -53,8 +53,7 @@ void loadShaders(){
 }
 
 int loadVao(Object * object){
-	//
-	//std::vector<unsigned int> vaoVect;
+	
 	// Store each shape on the VAO buffer
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=object->data.begin(); item!=object->data.end(); ++item){
 		
@@ -76,18 +75,21 @@ int loadVao(Object * object){
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
 			
-			// Set normal attributes
-			glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
-			glBufferData(GL_ARRAY_BUFFER, shape.Normals.size() * sizeof(float), &shape.Normals[0], GL_STATIC_DRAW);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
-
-			// Texture attributes
-			glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
-			glBufferData(GL_ARRAY_BUFFER, shape.TexCoord.size() * sizeof(float), &shape.TexCoord[0], GL_STATIC_DRAW);
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, VALS_PER_TEX, GL_FLOAT, GL_FALSE, 0, 0);
-						 
+			if (shape.Normals.size() > 0){
+				// Set normal attributes
+				glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
+				glBufferData(GL_ARRAY_BUFFER, shape.Normals.size() * sizeof(float), &shape.Normals[0], GL_STATIC_DRAW);
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1, VALS_PER_VERT, GL_FLOAT, GL_FALSE, 0, 0);  
+			}
+			
+			if (shape.TexCoord.size() > 0){
+				// Texture attributes
+				glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
+				glBufferData(GL_ARRAY_BUFFER, shape.TexCoord.size() * sizeof(float), &shape.TexCoord[0], GL_STATIC_DRAW);
+				glEnableVertexAttribArray(2);
+				glVertexAttribPointer(2, VALS_PER_TEX, GL_FLOAT, GL_FALSE, 0, 0);
+			}	 
 			// Un-bind
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
@@ -110,7 +112,7 @@ void setProjection(){
     glm::mat4 projection;
 	
     // glm::perspective(fovy, aspect, near, far)
-    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 30.0); 
+    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0); 
 	
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 	//for (int i=0;i<programIdArr.size();i++){
@@ -144,7 +146,7 @@ void renderGround(){
 			
 			// Assign the view matrix
 			int viewHandle = glGetUniformLocation(programId, "view");
-			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
 			
 			// Assign the model view matrix
 			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
@@ -157,7 +159,7 @@ void renderGround(){
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
 			
 			// Calculate the normal transformation based on the current view and the model view
-			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
 			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
 			
 			// Assign the colour value
@@ -213,7 +215,12 @@ void renderPlane(double dt){
 			
 			glUniform1i(texHandle,0);
 			
-			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewMtx) );
+			plane->updatePos(keyPress,dt);
+			
+			glm::vec3 pos = plane->getPos();
+			camera->lookAt(pos);
+			
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
 			
 			// Assign the model view matrix
 			
@@ -224,41 +231,67 @@ void renderPlane(double dt){
 			float screenScale = 0.8; // percentage of window object should take up
 			float scaleMultiplier = screenScale / ( plane->scale() );
 			
-			
-			plane->updatePos(dt);
-			
-			glm::vec3 pos = plane->getPos();
-			
-			float ori = plane->getOrientation();
-			
+			glm::vec3 rpy = plane->getOrientation();
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
-			mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 1.0 , 0.0)); 
-			mvMatrix = glm::rotate(mvMatrix, ori , glm::vec3(0.0 , 0.0 , -0.5)); 
+			mvMatrix = plane->getModelMat();
+			/* mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0)); */
 			
-			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
 			
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
 			
 			// Calculate the normal transformation based on the current view and the model view
-			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * viewMtx)));
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
 			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
 						
 			vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
 			
 		}
+		
 		glDrawArrays(GL_TRIANGLES,0,vertexCount);
 	}
 
 	glBindVertexArray(0);
-
 }
+
+void renderSkyBox(){
+	
+	glDepthMask(GL_FALSE);
+	
+	int programId = programIdMap["skybox"];
+	
+	glUseProgram( programId );
+	glBindVertexArray(skybox->data["none"][0].vaoHandle);
+	
+	int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+	
+	GLint cubeHandle = glGetUniformLocation(programId, "skybox");
+	glUniform1i(cubeHandle,0);
+			
+	glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(camera->getView()));  
+	glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewNoTranslation) );
+	
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	
+	int vertexCount = 3 * ( skybox->data["none"][0].triangleCount );
+	
+	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	glBindVertexArray(0);
+	
+	glDepthMask(GL_TRUE);
+	
+}
+
 
 void render( double dt ){
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
 	
-	// renderGround();
+	renderSkyBox();
+	renderGround();
 	renderPlane(dt);
 	
 	
@@ -297,6 +330,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				// Close the window on escape
 				glfwSetWindowShouldClose(window, GL_TRUE);
 				break;
+			case GLFW_KEY_UP:
+				keyPress["up"] = true;
+				break;
+			case GLFW_KEY_LEFT:
+				keyPress["left"] = true;
+				break;
+			case GLFW_KEY_DOWN:
+				keyPress["down"] = true;
+				break;
+			case GLFW_KEY_RIGHT:
+				keyPress["right"] = true;
+				break;
 			case GLFW_KEY_B:
 				if ( polygonMode == GL_LINE ) {
 					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -307,6 +352,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				break;
         }
     }
+	if (action == GLFW_RELEASE) {
+        switch (key) {
+			case GLFW_KEY_UP:
+				keyPress["up"] = false;
+				break;
+			case GLFW_KEY_LEFT:
+				keyPress["left"] = false;
+				break;
+			case GLFW_KEY_DOWN:
+				keyPress["down"] = false;
+				break;
+			case GLFW_KEY_RIGHT:
+				keyPress["right"] = false;
+				break;
+		}
+	}
 	
 }
 
@@ -353,8 +414,9 @@ int main(int argc, char** argv){
 // Setup rendering
 	
 	loadShaders();
-	
+
 // Load in objects
+	loadVao(skybox);
 	loadVao(ground);
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
@@ -366,7 +428,6 @@ int main(int argc, char** argv){
 // Initialise callbacks
 	glfwSetKeyCallback(window, key_callback);
     glfwSetFramebufferSizeCallback(window, reshape_callback);
-
 // Main rendering loop
 
     double start = glfwGetTime();

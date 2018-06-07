@@ -25,7 +25,7 @@ endif
 
 CC = g++ --std=c++11
 EXE = assign3_part2
-OBJS = main.o stb_image.o tiny_obj_loader.o shader.o Object.o Landscape.o Plane.o
+OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Landscape.o Plane.o
 libDir = libraries/
 
 .PHONY:  clean
@@ -41,14 +41,23 @@ main.o : main.cpp $(LINK)
 stb_image.o : $(libDir)stb_image.cpp
 	$(CC) -c -o stb_image.o $(libDir)stb_image.cpp
 	
+openglH.o : $(libDir)openglH.cpp
+	$(CC) -c -o openglH.o $(libDir)openglH.cpp
+	
 tiny_obj_loader.o : $(libDir)tiny_obj_loader.cpp
 	$(CC) -c -o tiny_obj_loader.o $(libDir)tiny_obj_loader.cpp
-
-shader.o : shader.cpp shader.hpp
-	$(CC) $(CPPFLAGS) -c shader.cpp
 	
-Object.o : worldGen/Object.cpp worldGen/Object.hpp Landscape.o Plane.o
+Camera.o : Camera.cpp Camera.hpp
+	$(CC) $(CPPFLAGS) -c Camera.cpp
+
+shader.o : $(libDir)shader.cpp $(libDir)shader.hpp
+	$(CC) $(CPPFLAGS) -c $(libDir)shader.cpp
+	
+Object.o : worldGen/Object.cpp worldGen/Object.hpp Skybox.o Landscape.o Plane.o
 	$(CC) $(CPPFLAGS) -c worldGen/Object.cpp
+	
+Skybox.o : worldGen/Skybox.cpp worldGen/Skybox.hpp
+	$(CC) $(CPPFLAGS) -c worldGen/Skybox.cpp
 	
 Landscape.o : worldGen/Landscape.cpp worldGen/Landscape.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Landscape.cpp

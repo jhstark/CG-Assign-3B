@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "../openglH.h"
+#include "../libraries/openglH.h"
 
 class Object{
 	
@@ -43,7 +43,7 @@ class Object{
 		void findMinMax();
 		virtual void loadFile( std::string input );
 		void loadShapes();
-		void loadTexture();
+		virtual void loadTexture();
 		bool FileExists(const std::string& abs_filename);
 };
 

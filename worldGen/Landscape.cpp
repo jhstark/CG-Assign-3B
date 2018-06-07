@@ -7,9 +7,9 @@
 
 Landscape::Landscape(float size){
 	
-	float groundSize = 1.0f;
+	float groundSize = 10.0f;
 	generateGround("flat" , groundSize , glm::vec3(-groundSize/2 , 0.0 , groundSize/2) );
-	generateGround("tri" , size , glm::vec3( -0.5 , 0 , 0 ) );
+	//generateGround("tri" , size , glm::vec3( -0.5 , 0 , 0 ) );
 	
 }
 
