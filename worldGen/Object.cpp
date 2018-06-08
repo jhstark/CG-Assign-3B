@@ -249,12 +249,13 @@ void Object::loadShapes(){
 		size_t index_offset = 0;
 		std::string lastTexName;
 		std::string texName;
+		int materialId = -1;
 		for (size_t f = 0; f < objFile.shapes[s].mesh.num_face_vertices.size(); f++) {
 			
 			int fv = objFile.shapes[s].mesh.num_face_vertices[f];
 			
 			// per-face material
-			int materialId = objFile.shapes[s].mesh.material_ids[f];
+			materialId = objFile.shapes[s].mesh.material_ids[f];
 			
 			texName = objFile.materials[materialId].diffuse_texname;
 			
@@ -264,10 +265,13 @@ void Object::loadShapes(){
 				shape.triangleCount = triangleCount;
 				triangleCount = 0;
 				// Send the shape to the global var
+				shape.matId = materialId;
 				data[lastTexName].push_back(shape);
 				
 				// Reset shape
 				shape = emptyObjShape;
+				
+				
 			}
 			
 			// Loop over vertices in the face.
@@ -312,9 +316,6 @@ void Object::loadShapes(){
 			}
 			
 			
-			shape.matId.push_back(materialId);
-			
-			
 			index_offset += fv;
 			lastTexName = texName;
 		}
@@ -322,6 +323,7 @@ void Object::loadShapes(){
 		shape.triangleCount = triangleCount;
 
 		// Send the shape to the global var
+		shape.matId = materialId;
 		data[texName].push_back(shape);
 		
 	}

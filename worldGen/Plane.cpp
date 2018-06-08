@@ -8,7 +8,7 @@
 Plane::Plane(){
 	
 	v = 1.0;
-	h = 1.0;
+	h = 5.0;
 	
 	resetPos(0.0);
 }

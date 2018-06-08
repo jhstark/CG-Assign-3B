@@ -19,7 +19,7 @@ class Object{
 			std::vector<float> TexCoord;
 			unsigned int vaoHandle;
 			int triangleCount;
-			std::vector<int> matId;
+			int matId;
 		};
 		
 		// Overarching struct for obj files

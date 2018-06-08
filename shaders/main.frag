@@ -75,8 +75,8 @@ vec3 headBlingPhongPointLight(in vec4 position, in vec3 norm){
 void main(void) {
 		
 	vec4 light = vec4(0.0);
-	//light = overheadPhongDirLight(vertex, normalize(normal));
-	light = texture(texMap, st);
+	light = vec4(overheadPhongDirLight(vertex, normalize(normal)) , 1.0);
+	//light = texture(texMap, st);
     /* if (lightingMode == 0){
 		light = overheadPhongDirLight(vertex, normalize(normal));
 	}

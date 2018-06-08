@@ -180,6 +180,63 @@ void renderGround(){
 	glBindVertexArray(0);
 	
 }
+
+void renderOverheadLight(tinyobj::material_t* material , int programId){
+	
+	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
+	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
+	int specularMtlHandle = glGetUniformLocation(programId, "mtl_specular");
+	int shininessHandle = glGetUniformLocation(programId, "shininess");
+	
+	if (ambientMtlHandle == -1 || diffuseMtlHandle == -1 || specularMtlHandle == -1 || shininessHandle == -1){
+		std::cout << "Can't find uniforms for material properties" << std::endl;
+		exit(1);
+	}
+	
+	// Overhead light source
+	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
+	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
+	int overheadDiffHandle = glGetUniformLocation(programId, "overheadlight_diffuse");
+	int overheadSpecHandle = glGetUniformLocation(programId, "overheadlight_specular");
+	
+	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
+		std::cout << "Can't find uniforms for overhead light" << std::endl;
+		exit(1);
+	}
+	
+	
+	// Set the material properties based on the given shape info
+	glUniform1f(shininessHandle,material->shininess);
+	
+	glUniform3f(ambientMtlHandle,
+			material->ambient[0],
+			material->ambient[1],
+			material->ambient[2]);
+	glUniform3f(diffuseMtlHandle,
+			material->diffuse[0],
+			material->diffuse[1],
+			material->diffuse[2]);
+	glUniform3f(specularMtlHandle,
+			material->specular[0],
+			material->specular[1],
+			material->specular[2]);
+			
+	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
+	
+	// Send the overhead light properties
+	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 1.0f };
+	glUniform4fv(overheadHandle, 1, overheadLightDir); 
+	
+	
+	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
+	
+	glUniform3f(overheadAmbHandle,ambient.x,ambient.y,ambient.z);
+	glUniform3f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z);
+	glUniform3f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z);
+	
+	
+}
+
 void renderPlane(double dt){
 	
 	int programId = programIdMap["main"];
@@ -213,6 +270,11 @@ void renderPlane(double dt){
 				exit(1);
 			}
 			
+			int matId = Shapes.at(i).matId;
+			
+			tinyobj::material_t* material = &plane->objFile.materials[matId];
+			renderOverheadLight(material,programId);
+			
 			glUniform1i(texHandle,0);
 			
 			plane->updatePos(keyPress,dt);
@@ -232,12 +294,13 @@ void renderPlane(double dt){
 			float scaleMultiplier = screenScale / ( plane->scale() );
 			
 			glm::vec3 rpy = plane->getOrientation();
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
+			
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
-			mvMatrix = plane->getModelMat();
-			/* mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z)); 
+			 
 			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0));
 			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); 
-			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0)); */
 			
 			
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
@@ -291,7 +354,7 @@ void render( double dt ){
 	
 	renderSkyBox();
 	renderGround();
-	//renderPlane(dt);
+	renderPlane(dt);
 	
 	
 	glFlush();
