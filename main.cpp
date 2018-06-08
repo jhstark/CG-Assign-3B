@@ -16,6 +16,7 @@
 #include "worldGen/Skybox.hpp"
 #include "worldGen/Plane.hpp"
 #include "worldGen/Landscape.hpp"
+#include "worldGen/HeightMap.hpp"
 
 // Load the objects in as global variables
 // NOTE: if you can think of a better way to do this for the render please do it!
@@ -23,7 +24,7 @@
 Camera *camera = new Camera();
 
 Skybox *skybox = new Skybox();
-Landscape *ground = new Landscape( 0.5 );
+HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 10.0f);
 Plane *plane = new Plane();
 
 
@@ -110,14 +111,6 @@ int loadVao(Object * object){
 void setProjection(){
 	
     glm::mat4 projection;
-
-	//avoid 0 vals
-	if(winX == 0){
-		winX = 1;
-	}
-	if(winY == 0){
-		winY = 1;
-	}
 	
     // glm::perspective(fovy, aspect, near, far)
     projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0); 
@@ -163,7 +156,10 @@ void renderGround(){
 			glm::mat4 mvMatrix;
 			glm::mat3 normMatrix;
 			
-			mvMatrix = glm::scale(mvMatrix, glm::vec3(1.0)); 
+			//scale and translate
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(0.1)); 
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(0.0, 35.0, 0.0));
+
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
 			
 			// Calculate the normal transformation based on the current view and the model view
@@ -383,6 +379,14 @@ void reshape_callback(GLFWwindow *window, int x, int y){
 	
     winX = x;
     winY = y;
+	//avoid 0 vals
+	if(winX == 0){
+		winX = 1;
+	}
+	if(winY == 0){
+		winY = 1;
+	}
+
     glViewport(0, 0, x, y); // Set the viewport to the size of the window
 	setProjection();
 	

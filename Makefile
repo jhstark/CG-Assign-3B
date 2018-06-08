@@ -25,7 +25,7 @@ endif
 
 CC = g++ --std=c++11
 EXE = assign3_part2
-OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Landscape.o Plane.o
+OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Landscape.o Plane.o HeightMap.o
 libDir = libraries/
 
 .PHONY:  clean
@@ -64,6 +64,9 @@ Landscape.o : worldGen/Landscape.cpp worldGen/Landscape.hpp
 	
 Plane.o : worldGen/Plane.cpp worldGen/Plane.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Plane.cpp
+
+HeightMap.o : worldGen/HeightMap.cpp worldGen/HeightMap.hpp
+	$(CC) $(CPPFLAGS) -c worldGen/HeightMap.cpp
 	
 clean:
 	rm -f *.o run$(EXT)
