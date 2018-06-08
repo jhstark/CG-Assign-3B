@@ -273,7 +273,7 @@ void renderSkyBox(){
 	glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(camera->getView()));  
 	glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(viewNoTranslation) );
 	
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->textureID);
 	
 	int vertexCount = 3 * ( skybox->data["none"][0].triangleCount );
 	
@@ -416,6 +416,7 @@ int main(int argc, char** argv){
 
 // Load in objects
 	loadVao(skybox);
+	skybox->loadTexture();
 	loadVao(ground);
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");

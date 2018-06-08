@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Camera::Camera(){
-	initEye = glm::vec3(0.0f , 0.5f , 10.0f);
+	initEye = glm::vec3(0.0f , 5.0f , 10.0f);
 	at = glm::vec3(0.0f, 0.0f, 0.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	reset();
@@ -12,7 +12,6 @@ Camera::Camera(){
 
 void Camera::reset(){
 	// Quick camera for now
-	
 	viewMtx = glm::lookAt(initEye, at, up);
 }
 

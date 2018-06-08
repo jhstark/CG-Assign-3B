@@ -63,8 +63,6 @@ void Skybox::generate(){
 	skybox.triangleCount = Vertices.size() / ( 3 * 3 );
 	
 	data["none"].push_back(skybox);
-	
-	loadTexture();
 }
 
 void Skybox::loadTexture(){
