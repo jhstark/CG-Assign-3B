@@ -110,6 +110,14 @@ int loadVao(Object * object){
 void setProjection(){
 	
     glm::mat4 projection;
+
+	//avoid 0 vals
+	if(winX == 0){
+		winX = 1;
+	}
+	if(winY == 0){
+		winY = 1;
+	}
 	
     // glm::perspective(fovy, aspect, near, far)
     projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0); 
