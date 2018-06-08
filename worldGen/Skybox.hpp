@@ -24,14 +24,6 @@ class Skybox:public Object{
 			"bottom.jpg",
 			"front.jpg",
 			"back.jpg" */
-		/* std::vector<std::string> faces{
-			"models/sor_lake1/lake1_rt.png",
-			"models/sor_lake1/lake1_lf.png",
-			"models/sor_lake1/lake1_up.png",
-			"models/sor_lake1/lake1_dn.png",
-			"models/sor_lake1/lake1_ft.png",
-			"models/sor_lake1/lake1_bk.png"
-		}; */
 		std::vector<std::string> faces{
 			"models/skybox/right.jpg",
 			"models/skybox/left.jpg",
