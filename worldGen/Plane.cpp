@@ -30,7 +30,6 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	double dt = timeOffset - lastUpdate;
 	bool xRot,yRot,zRot = false; 
 	lastRpy = rpy;
-	
 	if (keyPress["left"] == true){
 		zRot = true;
 		rpy.z = rpy.z - dt;
@@ -47,7 +46,6 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 		yRot = true;
 		rpy.x = rpy.x - dt;
 	}
-	
 	updatePosMat(zRot,xRot);
 	// pos.x = pos.x + v * (dt);
 	// pos.z = pos.z + v * (dt);
@@ -62,11 +60,13 @@ void Plane::updatePosMat(bool zRot, bool yRot){
 	glm::vec3 posY( posMat[0][1], posMat[1][1], posMat[2][1] );
 	glm::vec3 posZ( posMat[0][2], posMat[1][2], posMat[2][2] );
 
+	float speed = 3.0;
+	
 	//Rotate around the models z axis (roll)
 	if (zRot){
 		
-		float cosZ = cos(lastRpy.z - rpy.z);
-		float sinZ = sin(lastRpy.z - rpy.z);
+		float cosZ = cos(abs(speed*rpy.z - lastRpy.z));
+		float sinZ = sin(abs(speed*rpy.z - lastRpy.z));
 		glm::vec3 tmpX = posX;
 		
 		posX = glm::vec3(cosZ * posMat[0][0] , -sinZ*posMat[1][0] , posMat[2][0]);
