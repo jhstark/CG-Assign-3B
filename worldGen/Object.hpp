@@ -40,6 +40,8 @@ class Object{
 		std::map<std::string, GLuint> textures;
 		std::string base_dir = "";
 		
+		virtual void updatePos(std::map< std::string , bool > , double);
+		
 		virtual void printVertices();
 		float scale();
 		void findMinMax();

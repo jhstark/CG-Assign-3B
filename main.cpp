@@ -27,6 +27,7 @@ Skybox *skybox = new Skybox();
 HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 100.0f);
 Plane *plane = new Plane();
 Object *rock = new Object( glm::vec3(0.0 , 0.0 , -10.0) , glm::vec3(0.0) );
+//Object *cottage = new Object( glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
@@ -192,21 +193,21 @@ void renderOverheadLight(tinyobj::material_t* material , int programId){
 	int specularMtlHandle = glGetUniformLocation(programId, "mtl_specular");
 	int shininessHandle = glGetUniformLocation(programId, "shininess");
 	
-	if (ambientMtlHandle == -1 || diffuseMtlHandle == -1 || specularMtlHandle == -1 || shininessHandle == -1){
+/* 	if (ambientMtlHandle == -1 || diffuseMtlHandle == -1 || specularMtlHandle == -1 || shininessHandle == -1){
 		std::cout << "Can't find uniforms for material properties" << std::endl;
 		exit(1);
 	}
-	
+	 */
 	// Overhead light source
 	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
 	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
 	int overheadDiffHandle = glGetUniformLocation(programId, "overheadlight_diffuse");
 	int overheadSpecHandle = glGetUniformLocation(programId, "overheadlight_specular");
 	
-	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
+/* 	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
 		std::cout << "Can't find uniforms for overhead light" << std::endl;
 		exit(1);
-	}
+	} */
 	
 	
 	// Set the material properties based on the given shape info
@@ -275,163 +276,94 @@ void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::st
 	glActiveTexture( GL_TEXTURE0 );
 }
 
-void renderPlane(double dt){
+int setupRender(Object * obj , int programId,std::vector< Object::objShape > Shapes , double dt){
+	int vertexCount = 0;
+	for (int i=0;i<Shapes.size();i++){
+		
+		
+		int matId = Shapes.at(i).matId;
+		tinyobj::material_t* material = &obj->objFile.materials[matId];
+		activateTextures(programId, material , obj->textures );
+		
+		unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+		glBindVertexArray(vaoHandle);
+		
+		// Assign the view matrix
+		int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+		int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+		int normHandle = glGetUniformLocation(programId, "normalMatrix");
+		
+		/* if (viewHandle == -1 || mvHandle == -1 ){
+			std::cout << "Can't find uniforms view model" << std::endl;
+			std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
+			exit(1);
+		}
+		 */
+		if (dt > -1){
+			obj->updatePos(keyPress,dt);
+		}
+		
+		glm::vec3 pos = obj->getPos();
+		
+		renderOverheadLight(material,programId);
+		
+		
+		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
+		
+		// Assign the model view matrix
+		
+		glm::mat4 mvMatrix;
+		glm::mat3 normMatrix;
+		
+		// Calculate the model scale and normal transformation matrices
+		float screenScale = 0.8; // percentage of window object should take up
+		float scaleMultiplier = screenScale / ( obj->scale() );
+		
+		glm::vec3 rpy = obj->getOri();
+		
+		mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
+		mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
+		 
+		mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
+		mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
+		mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
+		
+		
+		glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+		
+		// Calculate the normal transformation based on the current view and the model view
+		normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
+		glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+					
+		vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
+		
+	}
+	return vertexCount;
+}
+
+void drawObject(Object * obj , double dt){
 	
 	int programId = programIdMap["main"];
 	glUseProgram( programId );
-	int vertexCount = 0;
+	int vertexCount;
 	
 	int texHandle = glGetUniformLocation(programId, "texMap");
 	int texHandleNorm = glGetUniformLocation(programId, "texMapNormal");
 	glUniform1i(texHandle,0);
 	glUniform1i(texHandleNorm,1);
 	
-	
-	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=plane->data.begin(); item!=plane->data.end(); ++item){
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=obj->data.begin(); item!=obj->data.end(); ++item){
+		
+		vertexCount = 0;
 		
 		std::vector< Object::objShape > Shapes = item->second;
 		
-		for (int i=0;i<Shapes.size();i++){
-			
-			
-			int matId = Shapes.at(i).matId;
-			tinyobj::material_t* material = &plane->objFile.materials[matId];
-			activateTextures(programId, material , plane->textures );
-			
-			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
-			glBindVertexArray(vaoHandle);
-			
-			// Assign the view matrix
-			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
-			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
-			int normHandle = glGetUniformLocation(programId, "normalMatrix");
-			
-			if (viewHandle == -1 || mvHandle == -1 ){
-				std::cout << "Can't find uniforms view model" << std::endl;
-				std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
-				exit(1);
-			}
-			
-			
-			plane->updatePos(keyPress,dt);
-			glm::vec3 pos = plane->getPos();
-			// camera->followPlane(pos);
-			
-			renderOverheadLight(material,programId);
-			//renderSpotlight(plane);
-			
-			
-			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
-			
-			// Assign the model view matrix
-			
-			glm::mat4 mvMatrix;
-			glm::mat3 normMatrix;
-			
-			// Calculate the model scale and normal transformation matrices
-			float screenScale = 0.8; // percentage of window object should take up
-			float scaleMultiplier = screenScale / ( plane->scale() );
-			
-			glm::vec3 rpy = plane->getOri();
-			
-			std::cout << rpy.x << "," << rpy.y << "," << rpy.z << std::endl;
-			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
-			
-			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
-			 
-			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
-			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
-			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
-			
-			
-			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
-			
-			// Calculate the normal transformation based on the current view and the model view
-			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
-			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-						
-			vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
-			
-		}
+		vertexCount += setupRender(obj , programId , Shapes , dt);
 		
 		glDrawArrays(GL_TRIANGLES,0,vertexCount);
+		
 	}
-
-	glBindVertexArray(0);
-}
-
-void renderRock(){
-	
-	int programId = programIdMap["main"];
-	glUseProgram( programId );
-	int vertexCount = 0;
-	
-	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=rock->data.begin(); item!=rock->data.end(); ++item){
 		
-		std::vector< Object::objShape > Shapes = item->second;
-		
-		for (int i=0;i<Shapes.size();i++){
-			
-			
-			int matId = Shapes.at(i).matId;
-			tinyobj::material_t* material = &rock->objFile.materials[matId];
-			activateTextures(programId , material , rock->textures );
-			
-			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
-			glBindVertexArray(vaoHandle);
-			
-			int texHandle = glGetUniformLocation(programId, "texMap");
-			
-			// Assign the view matrix
-			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
-			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
-			int normHandle = glGetUniformLocation(programId, "normalMatrix");
-			
-			if (viewHandle == -1 || mvHandle == -1 ){
-				std::cout << "Can't find uniforms view model" << std::endl;
-				std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
-				exit(1);
-			}
-			
-			renderOverheadLight(material,programId);
-			
-			glUniform1i(texHandle,0);
-			
-			glm::vec3 pos = rock->getPos();
-			
-			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
-			
-			// Assign the model view matrix
-			
-			glm::mat4 mvMatrix;
-			glm::mat3 normMatrix;
-			
-			// Calculate the model scale and normal transformation matrices
-			//float screenScale = 0.8; // percentage of window object should take up
-			float scaleMultiplier = 0.1;
-			
-			glm::vec3 rpy = rock->getOri();
-			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
-			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
-			
-			 
-			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
-			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0));
-			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); 
-			
-			
-			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
-			
-			// Calculate the normal transformation based on the current view and the model view
-			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
-			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-						
-			vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
-			
-		}
-		
-		glDrawArrays(GL_TRIANGLES,0,vertexCount);
-	}
 
 	glBindVertexArray(0);
 }
@@ -473,8 +405,11 @@ void render( double dt ){
 	
 	renderSkyBox();
 	renderGround();
-	renderRock();
-	renderPlane(dt);
+	
+	
+	drawObject(rock,-1);
+	drawObject(plane,dt);
+	//drawObject(cottage,-1);
 	
 	
 	glFlush();
@@ -635,11 +570,14 @@ int main(int argc, char** argv){
 	loadVao(ground);
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
+	//plane->printVertices();
 	loadVao(plane);
 	
 	rock->loadFile("models/rock/rock_v2.obj");
 	loadVao(rock);
-	//plane->printVertices();
+	
+	//cottage->loadFile("models/cottage/cottage.obj");
+	//loadVao(cottage);
 	
 	
 // Initialise callbacks

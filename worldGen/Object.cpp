@@ -79,6 +79,10 @@ float Object::scale(){
 	
 }
 
+void Object::updatePos(std::map< std::string , bool > keyPress, double dt){
+	// placeholder for now
+}
+
 void Object::findMinMax(){
 
 	std::map< std::string,glm::vec3 > minMax;
@@ -246,6 +250,8 @@ void Object::loadTexture(){
 	for (size_t i = 0; i < objFile.materials.size(); i++) {
 	
 		tinyobj::material_t* mat = &objFile.materials[i];
+		//std::cout<< "diff: " << mat->diffuse_texname << std::endl;
+		//std::cout<< "bump: " << mat->bump_texname << std::endl;
 		
 		if (mat->diffuse_texname.length() > 0) {
 			loadTexGPU(mat->diffuse_texname);
