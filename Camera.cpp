@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Camera::Camera(){
-	initEye = glm::vec3(0.0f , 5.0f , 5.0f);
+	initEye = glm::vec3(0.0f , 3.0f , 5.0f);
 	at = glm::vec3(0.0f, 0.0f, 0.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	reset();
@@ -12,7 +12,8 @@ Camera::Camera(){
 
 void Camera::reset(){
 	// Quick camera for now
-	viewMtx = glm::lookAt(initEye, at, up);
+	eye = initEye;
+	viewMtx = glm::lookAt(eye, at, up);
 }
 
 glm::mat4 Camera::getView(){
@@ -25,3 +26,20 @@ void Camera::lookAt(glm::vec3 pos){
 	viewMtx = glm::lookAt(initEye, at, up);
 	
 }
+
+void Camera::update(std::map< std::string , bool > keyPress){
+	if (keyPress["w"]){
+		eye.z = eye.z-0.5;
+	}
+	if (keyPress["s"]){
+		eye.z = eye.z+0.5;
+	}
+	if (keyPress["a"]){
+		eye.x = eye.x-0.5;
+	}
+	if (keyPress["d"]){
+		eye.x = eye.x+0.5;
+	}
+	viewMtx = glm::lookAt(eye, at, up);
+}
+	

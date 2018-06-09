@@ -24,9 +24,9 @@
 Camera *camera = new Camera();
 
 Skybox *skybox = new Skybox();
-HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 10.0f);
+HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 100.0f);
 Plane *plane = new Plane();
-Object *rock = new Object( glm::vec3(0.0) , glm::vec3(0.0) );
+Object *rock = new Object( glm::vec3(0.0 , 0.0 , -10.0) , glm::vec3(0.0) );
 
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
@@ -241,28 +241,65 @@ void renderOverheadLight(tinyobj::material_t* material , int programId){
 	
 }
 
+void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::string, GLuint> textures){
+	
+	std::string diffTex = mat->diffuse_texname;
+	std::string bumpTex = mat->bump_texname;
+	
+	int enableTexMapHand = glGetUniformLocation(programId, "enableTexMap");
+	int enableTexMapHandNorm = glGetUniformLocation(programId, "enableTexMapNorm");
+	glUniform1i(enableTexMapHand,0);
+	glUniform1i(enableTexMapHandNorm,0);
+	
+	// GLint v;
+	
+	if (textures.find(diffTex) != textures.end()) {
+		glUniform1i(enableTexMapHand,1);
+		glActiveTexture( GL_TEXTURE0 );
+		glBindTexture(GL_TEXTURE_2D, textures[diffTex]);
+		
+		// glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		
+		// std::cout << "Bound diff texture: " << diffTex << ",texID = " << textures[diffTex] << ", buffer = " << v <<  std::endl;
+	}
+			
+	if (textures.find(bumpTex) != textures.end()) {
+		glUniform1i(enableTexMapHandNorm,1);
+		glActiveTexture( GL_TEXTURE1 );
+		glBindTexture(GL_TEXTURE_2D, textures[bumpTex]);
+		
+		// glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		
+		// std::cout << "Bound bump texture: " << bumpTex << ",texID = " << textures[bumpTex] << ", buffer = " << v <<  std::endl;
+	}
+	glActiveTexture( GL_TEXTURE0 );
+}
+
 void renderPlane(double dt){
 	
 	int programId = programIdMap["main"];
+	glUseProgram( programId );
 	int vertexCount = 0;
+	
+	int texHandle = glGetUniformLocation(programId, "texMap");
+	int texHandleNorm = glGetUniformLocation(programId, "texMapNormal");
+	glUniform1i(texHandle,0);
+	glUniform1i(texHandleNorm,1);
+	
 	
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=plane->data.begin(); item!=plane->data.end(); ++item){
 		
 		std::vector< Object::objShape > Shapes = item->second;
 		
-			
-		std::string diffuse_texname = item->first;
-		if (plane->textures.find(diffuse_texname) != plane->textures.end()) {
-			glBindTexture(GL_TEXTURE_2D, plane->textures[diffuse_texname]);
-		}
-		
 		for (int i=0;i<Shapes.size();i++){
 			
-			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
-			glUseProgram( programId );
-			glBindVertexArray(vaoHandle);
 			
-			int texHandle = glGetUniformLocation(programId, "texMap");
+			int matId = Shapes.at(i).matId;
+			tinyobj::material_t* material = &plane->objFile.materials[matId];
+			activateTextures(programId, material , plane->textures );
+			
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glBindVertexArray(vaoHandle);
 			
 			// Assign the view matrix
 			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
@@ -275,17 +312,12 @@ void renderPlane(double dt){
 				exit(1);
 			}
 			
-			int matId = Shapes.at(i).matId;
-			
-			tinyobj::material_t* material = &plane->objFile.materials[matId];
 			renderOverheadLight(material,programId);
 			
-			glUniform1i(texHandle,0);
 			
 			plane->updatePos(keyPress,dt);
-			
 			glm::vec3 pos = plane->getPos();
-			camera->lookAt(pos);
+			
 			
 			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
 			
@@ -327,22 +359,21 @@ void renderPlane(double dt){
 void renderRock(){
 	
 	int programId = programIdMap["main"];
+	glUseProgram( programId );
 	int vertexCount = 0;
 	
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=rock->data.begin(); item!=rock->data.end(); ++item){
 		
 		std::vector< Object::objShape > Shapes = item->second;
 		
-			
-		std::string diffuse_texname = item->first;
-		if (rock->textures.find(diffuse_texname) != rock->textures.end()) {
-			glBindTexture(GL_TEXTURE_2D, rock->textures[diffuse_texname]);
-		}
-		
 		for (int i=0;i<Shapes.size();i++){
 			
+			
+			int matId = Shapes.at(i).matId;
+			tinyobj::material_t* material = &rock->objFile.materials[matId];
+			activateTextures(programId , material , rock->textures );
+			
 			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
-			glUseProgram( programId );
 			glBindVertexArray(vaoHandle);
 			
 			int texHandle = glGetUniformLocation(programId, "texMap");
@@ -358,15 +389,11 @@ void renderRock(){
 				exit(1);
 			}
 			
-			int matId = Shapes.at(i).matId;
-			
-			tinyobj::material_t* material = &rock->objFile.materials[matId];
 			renderOverheadLight(material,programId);
 			
 			glUniform1i(texHandle,0);
 			
 			glm::vec3 pos = rock->getPos();
-			camera->lookAt(pos);
 			
 			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
 			
@@ -376,13 +403,13 @@ void renderRock(){
 			glm::mat3 normMatrix;
 			
 			// Calculate the model scale and normal transformation matrices
-			float screenScale = 0.8; // percentage of window object should take up
-			float scaleMultiplier = screenScale / ( rock->scale() );
+			//float screenScale = 0.8; // percentage of window object should take up
+			float scaleMultiplier = 0.1;
 			
 			glm::vec3 rpy = rock->getOri();
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 			
-			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
 			 
 			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
 			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0));
@@ -437,6 +464,8 @@ void render( double dt ){
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
+	
+	camera->update(keyPress);
 	
 	renderSkyBox();
 	renderGround();
@@ -499,6 +528,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_RIGHT:
 				keyPress["right"] = true;
 				break;
+			case GLFW_KEY_W:
+				keyPress["w"] = true;
+				break;
+			case GLFW_KEY_A:
+				keyPress["a"] = true;
+				break;
+			case GLFW_KEY_S:
+				keyPress["s"] = true;
+				break;
+			case GLFW_KEY_D:
+				keyPress["d"] = true;
+				break;
 			case GLFW_KEY_B:
 				if ( polygonMode == GL_LINE ) {
 					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -522,6 +563,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				break;
 			case GLFW_KEY_RIGHT:
 				keyPress["right"] = false;
+				break;
+			case GLFW_KEY_W:
+				keyPress["w"] = false;
+				break;
+			case GLFW_KEY_A:
+				keyPress["a"] = false;
+				break;
+			case GLFW_KEY_S:
+				keyPress["s"] = false;
+				break;
+			case GLFW_KEY_D:
+				keyPress["d"] = false;
 				break;
 		}
 	}

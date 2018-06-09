@@ -24,5 +24,4 @@ void main(void) {
     st = mat2(vec2(1.0 , 0.0) , vec2(0.0, -1.0)) * a_texture;
 	vertex = objPos;
 	
-	
 }

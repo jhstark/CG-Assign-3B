@@ -6,7 +6,9 @@ uniform mat4 view;
 in vec2 st;
 
 uniform sampler2D texMap;
-
+uniform sampler2D texMapNormal;
+uniform bool enableTexMap;
+uniform bool enableTexMapNorm;
 out vec4 fragColour;
 
 uniform vec4 overheadlight_dir;
@@ -73,7 +75,42 @@ vec3 headBlingPhongPointLight(in vec4 position, in vec3 norm){
 	
 
 void main(void) {
-		
+
+
+	
+	vec4 light = vec4(0.0);
+	vec3 N = normal;
+	
+	if (enableTexMapNorm){
+	
+		// derivations of the fragment position
+		vec3 pos_dx = dFdx( vec3(vertex) );
+		vec3 pos_dy = dFdy( vec3(vertex) );
+		// derivations of the texture coordinate
+		vec2 texC_dx = dFdx( st );
+		vec2 texC_dy = dFdy( st );
+		// tangent vector and binormal vector
+		vec3 t = texC_dy.y * pos_dx - texC_dx.y * pos_dy;
+		vec3 b = texC_dx.x * pos_dy - texC_dy.x * pos_dx;
+
+		t = t - normal * dot( t, normal ); // orthonormalization ot the tangent vectors
+		b = b - normal * dot( b, normal ); // orthonormalization of the binormal vectors to the normal vector 
+		b = b - t * dot( b, t ); // orthonormalization of the binormal vectors to the tangent vector
+		mat3 tbn = mat3( normalize(t), normalize(b), normal );
+	
+		vec3 NN = texture(texMapNormal, st).xyz; // normal map
+		N =  tbn*normalize(2.0*NN.xyz-1.0);
+		//N =  normalize(2.0*NN.xyz-1.0);
+    }
+	
+	light.xyz = overheadPhongDirLight(vertex, normalize(N));
+	light = vec4(light.xyz,1.0);
+	
+	fragColour = light;
+	
+	//fragColour = texture(texMap, st);
+	
+	/* 
 	vec4 light = vec4(0.0);
 	light = vec4(overheadPhongDirLight(vertex, normalize(normal)) , 1.0);
 	//light = texture(texMap, st);
@@ -89,8 +126,8 @@ void main(void) {
 	else if (lightingMode == 3){
 		light = vec3(texture(texMap, st));
 	}
-	 */
-	fragColour = light;
+	
+	fragColour = light; */
 	
 	
 }

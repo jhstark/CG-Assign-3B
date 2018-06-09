@@ -47,7 +47,7 @@ class Object{
 		void loadShapes();
 		virtual void loadTexture();
 		bool FileExists(const std::string& abs_filename);
-		
+		void loadTexGPU(std::string); 
 		glm::vec3 getPos();
 		glm::vec3 getOri();
 		

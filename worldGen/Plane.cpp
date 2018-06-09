@@ -18,7 +18,8 @@ void Plane::resetPos(double dt){
 	rpy = glm::vec3(0.0);	// Roll pitch yaw (radians)
 	pos = glm::vec3(0.0);	// x y z position
 	posMat = glm::mat4();
-	pos.y = h;
+	pos.y = 2.5;
+	pos.z = 4.5;
 	posMat[3][2] = h;
 	
 	lastUpdate = dt;

@@ -190,62 +190,74 @@ bool Object::FileExists(const std::string& abs_filename) {
   return ret;
 }
 
+void Object::loadTexGPU(std::string texName){
+	// Only load the texture if it is not already loaded
+	if (textures.find(texName) == textures.end()) {
+		GLuint texture_id;
+		int w, h;
+		int comp;
+
+		std::string texture_filename = texName;
+		if (!FileExists(texture_filename)) {
+			// Append base dir.
+			texture_filename = base_dir + texName;
+			if (!FileExists(texture_filename)) {
+				std::cerr << "Unable to find file: " << texName << std::endl;
+				exit(1);
+			}
+		}
+
+		unsigned char* image =
+		stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+		if (!image) {
+			std::cerr << "Unable to load texture: " << texture_filename << std::endl;
+			exit(1);
+		}
+
+		glGenTextures(1, &texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		
+		GLint v;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		
+		std::cout << "Loaded texture: " << texture_filename << ", w = " << w
+		<< ", h = " << h << ", comp = " << comp << ",texID = " << texture_id << ", buffer = " << v <<  std::endl;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		if (comp == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, image);
+		}
+		else if (comp == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		} else {
+			assert(0);  // TODO
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(image);
+		textures.insert(std::make_pair(texName, texture_id));
+	}
+}
+
 void Object::loadTexture(){
 	
+	for (size_t i = 0; i < objFile.materials.size(); i++) {
 	
-	for (size_t m = 0; m < objFile.materials.size(); m++) {
-      tinyobj::material_t* mp = &objFile.materials[m];
-
-      if (mp->diffuse_texname.length() > 0) {
-        // Only load the texture if it is not already loaded
-        if (textures.find(mp->diffuse_texname) == textures.end()) {
-          GLuint texture_id;
-          int w, h;
-          int comp;
-
-          std::string texture_filename = mp->diffuse_texname;
-          if (!FileExists(texture_filename)) {
-            // Append base dir.
-            texture_filename = base_dir + mp->diffuse_texname;
-            if (!FileExists(texture_filename)) {
-              std::cerr << "Unable to find file: " << mp->diffuse_texname
-                        << std::endl;
-              exit(1);
-            }
-          }
-
-          unsigned char* image =
-              stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
-          if (!image) {
-            std::cerr << "Unable to load texture: " << texture_filename
-                      << std::endl;
-            exit(1);
-          }
-          std::cout << "Loaded texture: " << texture_filename << ", w = " << w
-                    << ", h = " << h << ", comp = " << comp << std::endl;
-
-          glGenTextures(1, &texture_id);
-          glBindTexture(GL_TEXTURE_2D, texture_id);
-		  
-		std::cout << "Bound "<< texture_filename <<" to " << texture_id << std::endl;
+		tinyobj::material_t* mat = &objFile.materials[i];
 		
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-          if (comp == 3) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                         GL_UNSIGNED_BYTE, image);
-          } else if (comp == 4) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-                         GL_UNSIGNED_BYTE, image);
-          } else {
-            assert(0);  // TODO
-          }
-          glBindTexture(GL_TEXTURE_2D, 0);
-          stbi_image_free(image);
-          textures.insert(std::make_pair(mp->diffuse_texname, texture_id));
-        }
-      }
+		if (mat->diffuse_texname.length() > 0) {
+			loadTexGPU(mat->diffuse_texname);
+		}
+		if (mat->bump_texname.length() > 0) {
+			glActiveTexture( GL_TEXTURE1 );
+			loadTexGPU(mat->bump_texname);
+		}
+		// Reset back to the default texture
+		glActiveTexture( GL_TEXTURE0 );
 	}
+
 }
 
 void Object::loadShapes(){
@@ -259,7 +271,8 @@ void Object::loadShapes(){
 		size_t index_offset = 0;
 		std::string lastTexName;
 		std::string texName;
-		int materialId = -1;
+		int materialId,lastMaterialId = -1;
+		
 		for (size_t f = 0; f < objFile.shapes[s].mesh.num_face_vertices.size(); f++) {
 			
 			int fv = objFile.shapes[s].mesh.num_face_vertices[f];
@@ -270,12 +283,12 @@ void Object::loadShapes(){
 			texName = objFile.materials[materialId].diffuse_texname;
 			
 			// If the material changes this will treat it as a new shape
-			if (f>0 && lastTexName != texName){
+			if (f>0 && ( materialId != lastMaterialId || lastTexName != texName )){
 		
 				shape.triangleCount = triangleCount;
 				triangleCount = 0;
 				// Send the shape to the global var
-				shape.matId = materialId;
+				shape.matId = lastMaterialId;
 				data[lastTexName].push_back(shape);
 				
 				// Reset shape
@@ -328,6 +341,7 @@ void Object::loadShapes(){
 			
 			index_offset += fv;
 			lastTexName = texName;
+			lastMaterialId = materialId;
 		}
 		
 		shape.triangleCount = triangleCount;
