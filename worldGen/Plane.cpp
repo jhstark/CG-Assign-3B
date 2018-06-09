@@ -109,13 +109,6 @@ void Plane::updatePosMat(bool zRot, bool yRot){
 	posMat[2][2] = posZ[2];
 }
 
-glm::vec3 Plane::getPos(){
-	return pos;
-}
 glm::mat4 Plane::getModelMat(){
 	return posMat;
-}
-
-glm::vec3 Plane::getOrientation(){
-	return rpy;
 }

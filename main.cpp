@@ -25,7 +25,7 @@ Camera *camera = new Camera();
 Skybox *skybox = new Skybox();
 Landscape *ground = new Landscape( 0.5 );
 Plane *plane = new Plane();
-
+Object *rock = new Object( glm::vec3(0.0) , glm::vec3(0.0) );
 
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
@@ -241,6 +241,7 @@ void renderPlane(double dt){
 	
 	int programId = programIdMap["main"];
 	int vertexCount = 0;
+	
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=plane->data.begin(); item!=plane->data.end(); ++item){
 		
 		std::vector< Object::objShape > Shapes = item->second;
@@ -293,7 +294,88 @@ void renderPlane(double dt){
 			float screenScale = 0.8; // percentage of window object should take up
 			float scaleMultiplier = screenScale / ( plane->scale() );
 			
-			glm::vec3 rpy = plane->getOrientation();
+			glm::vec3 rpy = plane->getOri();
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
+			
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
+			 
+			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0));
+			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); 
+			
+			
+			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+			
+			// Calculate the normal transformation based on the current view and the model view
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
+			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+						
+			vertexCount = vertexCount + 3 * ( Shapes.at(i).triangleCount );
+			
+		}
+		
+		glDrawArrays(GL_TRIANGLES,0,vertexCount);
+	}
+
+	glBindVertexArray(0);
+}
+
+void renderRock(){
+	
+	int programId = programIdMap["main"];
+	int vertexCount = 0;
+	
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=rock->data.begin(); item!=rock->data.end(); ++item){
+		
+		std::vector< Object::objShape > Shapes = item->second;
+		
+			
+		std::string diffuse_texname = item->first;
+		if (rock->textures.find(diffuse_texname) != rock->textures.end()) {
+			glBindTexture(GL_TEXTURE_2D, rock->textures[diffuse_texname]);
+		}
+		
+		for (int i=0;i<Shapes.size();i++){
+			
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glUseProgram( programId );
+			glBindVertexArray(vaoHandle);
+			
+			int texHandle = glGetUniformLocation(programId, "texMap");
+			
+			// Assign the view matrix
+			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+			int normHandle = glGetUniformLocation(programId, "normalMatrix");
+			
+			if (viewHandle == -1 || mvHandle == -1 ){
+				std::cout << "Can't find uniforms view model" << std::endl;
+				std::cout << viewHandle << " , " << mvHandle << " , " << std::endl;
+				exit(1);
+			}
+			
+			int matId = Shapes.at(i).matId;
+			
+			tinyobj::material_t* material = &rock->objFile.materials[matId];
+			renderOverheadLight(material,programId);
+			
+			glUniform1i(texHandle,0);
+			
+			glm::vec3 pos = rock->getPos();
+			camera->lookAt(pos);
+			
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
+			
+			// Assign the model view matrix
+			
+			glm::mat4 mvMatrix;
+			glm::mat3 normMatrix;
+			
+			// Calculate the model scale and normal transformation matrices
+			float screenScale = 0.8; // percentage of window object should take up
+			float scaleMultiplier = screenScale / ( rock->scale() );
+			
+			glm::vec3 rpy = rock->getOri();
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 			
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
@@ -354,6 +436,7 @@ void render( double dt ){
 	
 	renderSkyBox();
 	renderGround();
+	renderRock();
 	renderPlane(dt);
 	
 	
@@ -485,6 +568,8 @@ int main(int argc, char** argv){
 	//plane->loadFile("models/btest/Barrel02.obj");
 	loadVao(plane);
 	
+	rock->loadFile("models/rock/rock_v2.obj");
+	loadVao(rock);
 	//plane->printVertices();
 	
 	

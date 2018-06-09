@@ -12,6 +12,8 @@
 class Object{
 	
 	public:
+		Object();
+		Object(glm::vec3 , glm::vec3); // pos , orientation
 		// Struct for _shapes_ (can be multiple in one object)
 		struct objShape{
 			std::vector<float> Vertices;
@@ -45,6 +47,12 @@ class Object{
 		void loadShapes();
 		virtual void loadTexture();
 		bool FileExists(const std::string& abs_filename);
+		
+		glm::vec3 getPos();
+		glm::vec3 getOri();
+		
+		glm::vec3 pos;
+		glm::vec3 rpy;
 };
 
 #endif

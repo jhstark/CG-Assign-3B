@@ -4,6 +4,16 @@
 #include <map>
 #include "../libraries/openglH.h"
 
+Object::Object(){
+	pos = glm::vec3(0.0);
+	rpy = glm::vec3(0.0);
+}
+
+Object::Object(glm::vec3 posIn , glm::vec3 oriIn){
+	pos = posIn;
+	rpy = oriIn;
+}
+
 void Object::printVertices(){
 	int i;
 	
@@ -327,4 +337,12 @@ void Object::loadShapes(){
 		data[texName].push_back(shape);
 		
 	}
+}
+
+glm::vec3 Object::getPos(){
+	return pos;
+}
+
+glm::vec3 Object::getOri(){
+	return rpy;
 }
