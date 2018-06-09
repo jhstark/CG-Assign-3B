@@ -14,6 +14,8 @@ HeightMap::HeightMap(float scale , std::string image, float size): Object(scale)
 	
 	rpy.z =  -1.57; // -90degrees
 	pos.x = -1.0;
+    //position under
+    pos = glm::vec3(0.0, -10.0, -10.0);
     if(width < 2){
         std::cerr << "Image should have width > 1." << std::endl;
         exit(1);
@@ -65,35 +67,29 @@ std::vector<float> HeightMap::findNormals(std::vector<float> vert){
 	
 	glm::vec3 s1,s2,s3;
 	std::vector<float> Normals;
-	
-	for (int i=0;i<vert.size();i=i+9){
-		s1.x = vert.at(i);
-		s1.y = vert.at(i+1);
-		s1.z = vert.at(i+2);
-		
-		s2.x = vert.at(i+3);
-		s2.y = vert.at(i+4);
-		s2.z = vert.at(i+5);
-		
-		s3.x = vert.at(i+6);
-		s3.y = vert.at(i+7);
-		s3.z = vert.at(i+8);
-		
-		
-		/* glm::vec3 U = s2-s1;
-		glm::vec3 V = s3-s1; */
-		
-		glm::vec3 N;
-		N = glm::normalize(glm::cross(s3 - s1, s2 - s1));
-		
-		/* N.x = U.y * V.z - U.z * V.y;
-		N.y = U.z * V.x - U.x * V.z;
-		N.z = U.x * V.y - U.y * V.x; */
-		
-		Normals.push_back(N.x);
-		Normals.push_back(N.y);
-		Normals.push_back(N.z);
-	}
+    glm::vec3 N;
+
+
+    //for every triangle
+    for(int i=0; i<vert.size()-8; i=i+9){
+        s1.x = vert.at(i);
+	    s1.y = vert.at(i+1);
+	    s1.z = vert.at(i+2);
+        s2.x = vert.at(i+3);
+        s2.y = vert.at(i+4);
+	    s2.z = vert.at(i+5);
+        s3.x = vert.at(i+6);
+	    s3.y = vert.at(i+7);
+	    s3.z = vert.at(i+8);
+
+        N = glm::normalize(glm::cross(s2 - s1, s3 - s1));
+        //for every vert
+        for(int j=0; j<3; j++){
+            Normals.push_back(N.x);
+            Normals.push_back(N.y);
+            Normals.push_back(N.z);
+        }
+    }
 	
 	return Normals;
 }
@@ -119,6 +115,7 @@ std::vector<float> HeightMap::generateTexCoords(std::vector<float> vert, float s
 void HeightMap::generate(float size){
     std::vector<float> Vertices;
     float tileSize = size/width;
+    float zScale = size/255;
 
     //for centering
     glm::vec3 o(-size/2, 0.0, size/2);
@@ -129,29 +126,29 @@ void HeightMap::generate(float size){
             //first triangle
             //top left
             Vertices.push_back(o.x + float(x)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x][y]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x][y]));
             Vertices.push_back(o.z + float(y)*tileSize);
             //bottom left
             Vertices.push_back(o.x + float(x)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x][y+1]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x][y+1]));
             Vertices.push_back(o.z + float(y+1)*tileSize);
             //bottom right
             Vertices.push_back(o.x + float(x+1)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x+1][y+1]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x+1][y+1]));
             Vertices.push_back(o.z + float(y+1)*tileSize);
 
             //second triangle
             //top left
             Vertices.push_back(o.x + float(x)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x][y]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x][y]));
             Vertices.push_back(o.z + float(y)*tileSize);
             //bottom right
             Vertices.push_back(o.x + float(x+1)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x+1][y+1]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x+1][y+1]));
             Vertices.push_back(o.z + float(y+1)*tileSize);
             //top right
             Vertices.push_back(o.x + float(x+1)*tileSize);
-            Vertices.push_back(o.y + tileSize*float(heightMap[x+1][y]));
+            Vertices.push_back(o.y + zScale*float(heightMap[x+1][y]));
             Vertices.push_back(o.z + float(y)*tileSize);
         }
     }
