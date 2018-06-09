@@ -27,6 +27,15 @@ void Camera::lookAt(glm::vec3 pos){
 	
 }
 
+void Camera::followPlane(glm::vec3 pos){
+	
+	glm::vec3 at(pos.x, pos.y, pos.z);
+	eye.y = pos.y + 1.0;
+	eye.z = pos.z + 2.0;
+	viewMtx = glm::lookAt(initEye, at, up);
+	
+}
+
 void Camera::update(std::map< std::string , bool > keyPress){
 	if (keyPress["w"]){
 		eye.z = eye.z-0.5;

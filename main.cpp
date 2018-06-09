@@ -312,11 +312,13 @@ void renderPlane(double dt){
 				exit(1);
 			}
 			
-			renderOverheadLight(material,programId);
-			
 			
 			plane->updatePos(keyPress,dt);
 			glm::vec3 pos = plane->getPos();
+			// camera->followPlane(pos);
+			
+			renderOverheadLight(material,programId);
+			//renderSpotlight(plane);
 			
 			
 			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
@@ -331,13 +333,15 @@ void renderPlane(double dt){
 			float scaleMultiplier = screenScale / ( plane->scale() );
 			
 			glm::vec3 rpy = plane->getOri();
+			
+			std::cout << rpy.x << "," << rpy.y << "," << rpy.z << std::endl;
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 			
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
 			 
-			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(1.0 , 0.0 , 0.0)); 
-			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(0.0 , 1.0 , 0.0));
-			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); 
+			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
+			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
+			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
 			
 			
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );

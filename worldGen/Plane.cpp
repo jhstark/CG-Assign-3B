@@ -5,6 +5,12 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
+
+#define DEG2RAD(x) ((x)*M_PI/180.0) 
+
 Plane::Plane(){
 	
 	v = 1.0;
@@ -15,7 +21,7 @@ Plane::Plane(){
 
 void Plane::resetPos(double dt){
 	
-	rpy = glm::vec3(0.0);	// Roll pitch yaw (radians)
+	rpy = glm::vec3( 0.0 , 0.0 , DEG2RAD(180) );	// Roll pitch yaw (radians)
 	pos = glm::vec3(0.0);	// x y z position
 	posMat = glm::mat4();
 	pos.y = 2.5;
@@ -31,21 +37,38 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	double dt = timeOffset - lastUpdate;
 	bool xRot,yRot,zRot = false; 
 	lastRpy = rpy;
+	
+	// Change yaw on left and right arrow
 	if (keyPress["left"] == true){
-		zRot = true;
-		rpy.z = rpy.z - dt;
-	}
-	if (keyPress["right"] == true){
 		zRot = true;
 		rpy.z = rpy.z + dt;
 	}
+	if (keyPress["right"] == true){
+		zRot = true;
+		rpy.z = rpy.z - dt;
+	}
+	
+	// Change pitch on left and right arrow
 	if (keyPress["up"] == true){
 		xRot = true;
-		rpy.x = rpy.x + dt;
+		rpy.y = rpy.y + dt;
 	}
 	if (keyPress["down"] == true){
-		yRot = true;
-		rpy.x = rpy.x - dt;
+		xRot = true;
+		rpy.y = rpy.y - dt;
+	}
+	if (rpy.y > 0.05){
+		pos.y = pos.y + 0.05*rpy.y;
+	}
+	else if (rpy.y < 0.05){
+		pos.y = pos.y - 0.05*rpy.y;
+	}
+	
+	if (rpy.z > 0.05){
+		pos.x = pos.x + 0.05*rpy.x;
+	}
+	else if (rpy.z < 0.05){
+		pos.x = pos.x - 0.05*rpy.x;
 	}
 	updatePosMat(zRot,xRot);
 	// pos.x = pos.x + v * (dt);

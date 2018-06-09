@@ -22,6 +22,7 @@ class Camera{
 		glm::mat4 getView();
 		void reset();
 		void update(std::map< std::string , bool >);
+		void followPlane(glm::vec3 pos);
 	private:
 		glm::mat4 viewMtx;
 		glm::vec3 initEye;
