@@ -12,8 +12,8 @@
 class Object{
 	
 	public:
-		Object();
-		Object(glm::vec3 , glm::vec3); // pos , orientation
+		Object(float);
+		Object(float,glm::vec3 , glm::vec3); // pos , orientation
 		// Struct for _shapes_ (can be multiple in one object)
 		struct objShape{
 			std::vector<float> Vertices;
@@ -43,7 +43,8 @@ class Object{
 		virtual void updatePos(std::map< std::string , bool > , double);
 		
 		virtual void printVertices();
-		float scale();
+		
+		float scale;
 		void findMinMax();
 		virtual void loadFile( std::string input );
 		void loadShapes();

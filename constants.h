@@ -11,6 +11,8 @@
 	#define M_PI 3.14159265358979323846
 #endif
 
+#define DEG2RAD(x) ((x)*M_PI/180.0) 
+
 int winX = 800;
 int winY = 800;
 

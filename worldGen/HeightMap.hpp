@@ -11,7 +11,7 @@
 
 class HeightMap:public Object{
 	public:
-		HeightMap(std::string, float size);
+		HeightMap(float , std::string, float size);
     private:
         void loadHeightMap(std::string);
         std::vector<float> findNormals(std::vector<float>);

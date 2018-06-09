@@ -23,13 +23,16 @@
 
 Camera *camera = new Camera();
 
-Skybox *skybox = new Skybox();
-HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 100.0f);
+// Define new objects here, Object(float scale , glm::vec3 pos , glm::vec3 rpy)
+// rpy = roll, pitch, yaw in radians from initial orientation
 
-Plane *plane = new Plane();
-Object *rock = new Object( glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
-Object *cottage = new Object( glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0) );
-Object *lampPost = new Object( glm::vec3(-1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Skybox *skybox = new Skybox(1.0);
+HeightMap *ground = new HeightMap(1.0 , "models/heightmap/HeightMap.png", 100.0f);
+
+Plane *plane = new Plane(0.1);
+Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *cottage = new Object( 0.05 , glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-120)) );
+Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , 0.0) , glm::vec3(0.0) );
 
 
 std::map< std::string , bool > keyPress;
@@ -330,15 +333,11 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		
 		glm::mat4 mvMatrix;
 		glm::mat3 normMatrix;
-		
-		// Calculate the model scale and normal transformation matrices
-		float screenScale = 0.8; // percentage of window object should take up
-		float scaleMultiplier = screenScale / ( obj->scale() );
-		
+				
 		glm::vec3 rpy = obj->getOri();
 		
 		mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
-		mvMatrix = glm::scale(mvMatrix, glm::vec3(scaleMultiplier));
+		mvMatrix = glm::scale(mvMatrix, glm::vec3(obj->scale));
 		 
 		mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
 		mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
@@ -586,7 +585,8 @@ int main(int argc, char** argv){
 	loadVao(skybox);
 	skybox->loadTexture();
 	loadVao(ground);
-	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
+	
+	 plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
 	//plane->printVertices();
 	loadVao(plane);

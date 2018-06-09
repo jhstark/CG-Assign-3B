@@ -4,12 +4,14 @@
 #include <map>
 #include "../libraries/openglH.h"
 
-Object::Object(){
+Object::Object(float scaleIn){
+	scale = scaleIn;
 	pos = glm::vec3(0.0);
 	rpy = glm::vec3(0.0);
 }
 
-Object::Object(glm::vec3 posIn , glm::vec3 oriIn){
+Object::Object(float scaleIn, glm::vec3 posIn , glm::vec3 oriIn){
+	scale = scaleIn;
 	pos = posIn;
 	rpy = oriIn;
 }
@@ -46,7 +48,7 @@ void Object::printVertices(){
 	}
 }
 
-// Returns the highest axis distance to scale by
+/* // Returns the highest axis distance to scale by
 float Object::scale(){
 
 	float dist;
@@ -77,7 +79,7 @@ float Object::scale(){
 	
 	return dist;
 	
-}
+} */
 
 void Object::updatePos(std::map< std::string , bool > keyPress, double dt){
 	// placeholder for now

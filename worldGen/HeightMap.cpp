@@ -7,7 +7,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-HeightMap::HeightMap(std::string image, float size){
+HeightMap::HeightMap(float scale , std::string image, float size): Object(scale){
     
     loadHeightMap(image);
     if(width < 2){

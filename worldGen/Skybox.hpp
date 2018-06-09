@@ -8,7 +8,7 @@
 class Skybox:public Object{
 	
 	public:
-		Skybox();
+		Skybox(float);
 		unsigned int textureID;
 		void loadTexture();
 		

@@ -25,7 +25,7 @@ endif
 
 CC = g++ --std=c++11
 EXE = assign3_part2
-OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Landscape.o Plane.o HeightMap.o
+OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Plane.o HeightMap.o
 libDir = libraries/
 
 .PHONY:  clean
@@ -53,14 +53,11 @@ Camera.o : Camera.cpp Camera.hpp
 shader.o : $(libDir)shader.cpp $(libDir)shader.hpp
 	$(CC) $(CPPFLAGS) -c $(libDir)shader.cpp
 	
-Object.o : worldGen/Object.cpp worldGen/Object.hpp Skybox.o Landscape.o Plane.o
+Object.o : worldGen/Object.cpp worldGen/Object.hpp Skybox.o Plane.o HeightMap.o
 	$(CC) $(CPPFLAGS) -c worldGen/Object.cpp
 	
 Skybox.o : worldGen/Skybox.cpp worldGen/Skybox.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Skybox.cpp
-	
-Landscape.o : worldGen/Landscape.cpp worldGen/Landscape.hpp
-	$(CC) $(CPPFLAGS) -c worldGen/Landscape.cpp
 	
 Plane.o : worldGen/Plane.cpp worldGen/Plane.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/Plane.cpp

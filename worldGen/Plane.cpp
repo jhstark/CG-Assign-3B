@@ -11,7 +11,7 @@
 
 #define DEG2RAD(x) ((x)*M_PI/180.0) 
 
-Plane::Plane(){
+Plane::Plane(float scale) : Object(scale){
 	
 	v = 1.0;
 	h = 5.0;

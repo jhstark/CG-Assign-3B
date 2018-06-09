@@ -5,7 +5,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-Skybox::Skybox(){
+Skybox::Skybox(float scale) : Object(scale){
 	
 	generate();
 	

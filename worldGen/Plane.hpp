@@ -11,7 +11,7 @@
 class Plane:public Object{
 	
 	public:
-		Plane();		// Sets initial values
+		Plane(float);		// Sets initial values
 		void updatePos(std::map< std::string , bool > , double);
 		void resetPos(double);
 		glm::mat4 getModelMat();
