@@ -15,7 +15,7 @@ HeightMap::HeightMap(float scale , std::string image, float size): Object(scale)
 	rpy.z =  -1.57; // -90degrees
 	pos.x = -1.0;
     //position under
-    pos = glm::vec3(0.0, -10.0, -10.0);
+    pos = glm::vec3(0.0, -1.0, -1.0);
     if(width < 2){
         std::cerr << "Image should have width > 1." << std::endl;
         exit(1);

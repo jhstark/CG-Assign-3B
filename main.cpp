@@ -26,7 +26,7 @@ Camera *camera = new Camera();
 // rpy = roll, pitch, yaw in radians from initial orientation
 
 Skybox *skybox = new Skybox(1.0);
-HeightMap *ground = new HeightMap(1.0 , "models/heightmap/Heightmap.png", 10.0f);
+HeightMap *ground = new HeightMap(10.0f , "models/heightmap/Heightmap.png", 1.0f);
 
 Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
@@ -48,6 +48,7 @@ void loadShaders(){
 	programIdMap["debug"] = LoadShaders("shaders/debug_inspect.vert", "shaders/debug_inspect.frag");
 	programIdMap["main"] = LoadShaders("shaders/main.vert", "shaders/main.frag");
 	programIdMap["skybox"] = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
+	programIdMap["ground"] = LoadShaders("shaders/ground.vert", "shaders/ground.frag");
 	
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
@@ -140,7 +141,7 @@ void setProjection(){
 	   
 void renderGround(){
 	
-	int programId = programIdMap["debug"];
+	int programId = programIdMap["ground"];
 	
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=ground->data.begin(); item!=ground->data.end(); ++item){
 		
