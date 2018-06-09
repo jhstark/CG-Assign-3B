@@ -279,7 +279,7 @@ void Object::loadShapes(){
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
 		std::string lastTexName;
-		std::string texName;
+		std::string texName = "";
 		int materialId,lastMaterialId = -1;
 		
 		for (size_t f = 0; f < objFile.shapes[s].mesh.num_face_vertices.size(); f++) {
@@ -298,6 +298,9 @@ void Object::loadShapes(){
 				triangleCount = 0;
 				// Send the shape to the global var
 				shape.matId = lastMaterialId;
+				if (lastTexName == ""){
+					lastTexName = std::to_string(f);
+				}
 				data[lastTexName].push_back(shape);
 				
 				// Reset shape
@@ -357,6 +360,9 @@ void Object::loadShapes(){
 
 		// Send the shape to the global var
 		shape.matId = materialId;
+		if (texName == ""){
+			texName = std::to_string(s);
+		}
 		data[texName].push_back(shape);
 		
 	}

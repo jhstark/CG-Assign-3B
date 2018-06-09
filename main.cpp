@@ -29,6 +29,8 @@ HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 100.0f);
 Plane *plane = new Plane();
 Object *rock = new Object( glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *lampPost = new Object( glm::vec3(-1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+
 
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
@@ -425,6 +427,7 @@ void render( double dt ){
 	
 	drawObject(cottage,-1);
 	drawObject(rock,-1);
+	drawObject(lampPost,-1);
 	drawObject(plane,dt);
 	
 	
@@ -593,6 +596,9 @@ int main(int argc, char** argv){
 	
 	cottage->loadFile("models/cottage/cottage.obj");
 	loadVao(cottage);
+	
+	lampPost->loadFile("models/lamp_post/rv_lamp_post_4.obj");
+	loadVao(lampPost);
 	
 	
 // Initialise callbacks
