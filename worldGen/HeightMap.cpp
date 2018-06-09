@@ -10,11 +10,14 @@
 HeightMap::HeightMap(float scale , std::string image, float size): Object(scale){
     
     loadHeightMap(image);
+    generate(size);
+	
+	rpy.z =  -1.57; // -90degrees
+	pos.x = -1.0;
     if(width < 2){
         std::cerr << "Image should have width > 1." << std::endl;
         exit(1);
     }
-    generate(size);
 }
 
 //loads image data from specified file, convert to w x h vector

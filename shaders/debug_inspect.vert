@@ -6,7 +6,7 @@ layout (location = 2) in vec2 a_texture;
 
 uniform mat4 projection;
 uniform mat4 modelviewMatrix;
-uniform mat4 view;
+uniform mat4 viewMatrix;
 uniform mat3 normalMatrix;
 uniform vec3 Kd;
 
@@ -15,7 +15,7 @@ out vec3 normal;
 
 void main(void) {
 
-	vec4 objPos = view * modelviewMatrix * vec4(a_vertex, 1.0);
+	vec4 objPos = viewMatrix * modelviewMatrix * vec4(a_vertex, 1.0);
 	gl_Position = projection * objPos;
 	
 	fragCol = Kd;

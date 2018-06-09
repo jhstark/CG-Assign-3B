@@ -213,8 +213,7 @@ void Object::loadTexGPU(std::string texName){
 			}
 		}
 
-		unsigned char* image =
-		stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+		unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
 		if (!image) {
 			std::cerr << "Unable to load texture: " << texture_filename << std::endl;
 			exit(1);
@@ -229,8 +228,8 @@ void Object::loadTexGPU(std::string texName){
 		std::cout << "Loaded texture: " << texture_filename << ", w = " << w
 		<< ", h = " << h << ", comp = " << comp << ",texID = " << texture_id << ", buffer = " << v <<  std::endl;
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		
 		if (comp == 3) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
@@ -241,6 +240,8 @@ void Object::loadTexGPU(std::string texName){
 		} else {
 			assert(0);  // TODO
 		}
+		glGenerateMipmap(GL_TEXTURE_2D); 
+		
 		glBindTexture(GL_TEXTURE_2D, 0);
 		stbi_image_free(image);
 		textures.insert(std::make_pair(texName, texture_id));

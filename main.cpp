@@ -18,21 +18,21 @@
 #include "worldGen/Landscape.hpp"
 #include "worldGen/HeightMap.hpp"
 
-// Load the objects in as global variables
-// NOTE: if you can think of a better way to do this for the render please do it!
-
 Camera *camera = new Camera();
 
-// Define new objects here, Object(float scale , glm::vec3 pos , glm::vec3 rpy)
+
+// Load the objects in as global variables
+// Object(float scale , glm::vec3 pos , glm::vec3 rpy)
 // rpy = roll, pitch, yaw in radians from initial orientation
 
 Skybox *skybox = new Skybox(1.0);
-HeightMap *ground = new HeightMap(1.0 , "models/heightmap/HeightMap.png", 100.0f);
+HeightMap *ground = new HeightMap(1.0 , "models/heightmap/HeightMap.png", 1.0f);
 
-Plane *plane = new Plane(0.1);
+Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( 0.05 , glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-120)) );
 Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *tree = new Object( 0.1 , glm::vec3(-0.5 , 0.0 , -1.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
 
 
 std::map< std::string , bool > keyPress;
@@ -153,7 +153,7 @@ void renderGround(){
 			glBindVertexArray(vaoHandle);
 			
 			// Assign the view matrix
-			int viewHandle = glGetUniformLocation(programId, "view");
+			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
 			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
 			
 			// Assign the model view matrix
@@ -164,24 +164,16 @@ void renderGround(){
 			glm::mat3 normMatrix;
 			
 			//scale and translate
-			mvMatrix = glm::scale(mvMatrix, glm::vec3(0.1)); 
-			mvMatrix = glm::translate(mvMatrix, glm::vec3(0.0, 35.0, 0.0));
+			// Set pos using ground->pos = glm::vec3( x , y , z)
+			glm::vec3 pos = ground->getPos();
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(ground->scale)); 
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
 			
 			// Calculate the normal transformation based on the current view and the model view
 			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
 			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
-			
-			// Assign the colour value
-			int diffuseHandle = glGetUniformLocation(programId, "Kd");
-			
-			if ( diffuseHandle == -1 ){
-				std::cout << "Can't find uniforms colour diffuse" << std::endl;
-				exit(1);
-			}
-			
-			glUniform3f(diffuseHandle, 0.5 , 1.0 , 0.5);
 				
 			int vertexCount = 3 * ( Shapes.at(i).triangleCount );
 			glDrawArrays(GL_TRIANGLES,0,vertexCount);
@@ -245,6 +237,11 @@ void renderOverheadLight(tinyobj::material_t* material , int programId){
 	glUniform3f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z);
 	glUniform3f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z);
 	
+	
+}
+
+void renderAircraftLight(){
+	glm::vec3 direction = glm::vec3( 0.0, -1.0, 0.0 ); //Straight down until there is a vector that represents the aircraft orientation
 	
 }
 
@@ -427,6 +424,16 @@ void render( double dt ){
 	drawObject(cottage,-1);
 	drawObject(rock,-1);
 	drawObject(lampPost,-1);
+	
+	tree->pos.x = -0.5;
+	tree->pos.z = -1.0;
+	
+	drawObject(tree,-1);
+	
+	tree->pos.x = -1.0;
+	tree->pos.z = -1.5;
+	
+	drawObject(tree,-1);
 	drawObject(plane,dt);
 	
 	
@@ -585,10 +592,10 @@ int main(int argc, char** argv){
 	loadVao(skybox);
 	skybox->loadTexture();
 	loadVao(ground);
+	// ground->printVertices();
 	
 	 plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
-	//plane->printVertices();
 	loadVao(plane);
 	
 	rock->loadFile("models/rock/rock_v2.obj");
@@ -599,6 +606,9 @@ int main(int argc, char** argv){
 	
 	lampPost->loadFile("models/lamp_post/rv_lamp_post_4.obj");
 	loadVao(lampPost);
+	
+	tree->loadFile("models/Treeobj/Tree.obj");
+	loadVao(tree);
 	
 	
 // Initialise callbacks
