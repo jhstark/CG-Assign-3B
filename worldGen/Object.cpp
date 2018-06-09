@@ -250,15 +250,18 @@ void Object::loadTexture(){
 	for (size_t i = 0; i < objFile.materials.size(); i++) {
 	
 		tinyobj::material_t* mat = &objFile.materials[i];
-		//std::cout<< "diff: " << mat->diffuse_texname << std::endl;
-		//std::cout<< "bump: " << mat->bump_texname << std::endl;
+		std::cout<< "diff: " << mat->diffuse_texname << std::endl;
+		std::cout<< "bump: " << mat->bump_texname << std::endl;
+		std::cout<< "spec: " << mat->specular_texname << std::endl;
 		
 		if (mat->diffuse_texname.length() > 0) {
 			loadTexGPU(mat->diffuse_texname);
 		}
 		if (mat->bump_texname.length() > 0) {
-			glActiveTexture( GL_TEXTURE1 );
 			loadTexGPU(mat->bump_texname);
+		}
+		if (mat->specular_texname.length() > 0) {
+			loadTexGPU(mat->specular_texname);
 		}
 		// Reset back to the default texture
 		glActiveTexture( GL_TEXTURE0 );

@@ -3,14 +3,15 @@
 
 newmtl A6M_ZERO
 Ns 96.078431
-Kd 0.8 0.8 0.8
-Ka 0.4 0.4 0.4
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
 Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
 map_Kd A6M_ZERO_D.tga
-
+bump -bm 1.0 A6M_ZERO_N.tga
+map_Ks A6M_ZERO_S.tga
 newmtl propeller_rotation
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000

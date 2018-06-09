@@ -1,0 +1,29 @@
+newmtl House:blinn3SG
+illum 4
+Kd 0.8 0.8 0.8
+Ka 0.4 0.4 0.4
+Tf 1.00 1.00 1.00
+map_Kd House_diff.png
+bump -bm 1 House_UV_Normals.png
+Ni 1.00
+Ks 0.00 0.00 0.00
+map_Ks House_UV_specular.png
+
+newmtl House:blinn4SG
+illum 4
+Kd 0.8 0.8 0.8
+Ka 0.4 0.4 0.4
+Tf 1.00 1.00 1.00
+map_Kd tramy_UVout.png
+bump -bm 1 tramy_UVnormalst.png
+Ni 1.00
+Ks 0.00 0.00 0.00
+map_Ks tramy_UVspercular.png
+
+newmtl blinn1SG
+illum 4
+Kd 0.60 0.60 0.60
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.70 0.70 0.70

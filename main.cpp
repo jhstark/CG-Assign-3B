@@ -25,9 +25,10 @@ Camera *camera = new Camera();
 
 Skybox *skybox = new Skybox();
 HeightMap *ground = new HeightMap("models/heightmap/HeightMap.png", 100.0f);
+
 Plane *plane = new Plane();
-Object *rock = new Object( glm::vec3(0.0 , 0.0 , -10.0) , glm::vec3(0.0) );
-//Object *cottage = new Object( glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *rock = new Object( glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *cottage = new Object( glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
@@ -246,22 +247,25 @@ void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::st
 	
 	std::string diffTex = mat->diffuse_texname;
 	std::string bumpTex = mat->bump_texname;
+	std::string specTex = mat->specular_texname;
 	
 	int enableTexMapHand = glGetUniformLocation(programId, "enableTexMap");
 	int enableTexMapHandNorm = glGetUniformLocation(programId, "enableTexMapNorm");
+	int enableTexMapHandSpec = glGetUniformLocation(programId, "enableTexMapSpec");
 	glUniform1i(enableTexMapHand,0);
 	glUniform1i(enableTexMapHandNorm,0);
+	glUniform1i(enableTexMapHandSpec,0);
 	
-	// GLint v;
+	//GLint v;
 	
 	if (textures.find(diffTex) != textures.end()) {
 		glUniform1i(enableTexMapHand,1);
 		glActiveTexture( GL_TEXTURE0 );
 		glBindTexture(GL_TEXTURE_2D, textures[diffTex]);
 		
-		// glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		//glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
 		
-		// std::cout << "Bound diff texture: " << diffTex << ",texID = " << textures[diffTex] << ", buffer = " << v <<  std::endl;
+		//std::cout << "Bound diff texture: " << diffTex << ",texID = " << textures[diffTex] << ", buffer = " << v <<  std::endl;
 	}
 			
 	if (textures.find(bumpTex) != textures.end()) {
@@ -269,9 +273,19 @@ void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::st
 		glActiveTexture( GL_TEXTURE1 );
 		glBindTexture(GL_TEXTURE_2D, textures[bumpTex]);
 		
-		// glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		//glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
 		
-		// std::cout << "Bound bump texture: " << bumpTex << ",texID = " << textures[bumpTex] << ", buffer = " << v <<  std::endl;
+		//std::cout << "Bound bump texture: " << bumpTex << ",texID = " << textures[bumpTex] << ", buffer = " << v <<  std::endl;
+	}
+			
+	if (textures.find(specTex) != textures.end()) {
+		glUniform1i(enableTexMapHandSpec,1);
+		glActiveTexture( GL_TEXTURE2 );
+		glBindTexture(GL_TEXTURE_2D, textures[specTex]);
+		
+		//glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
+		
+		//std::cout << "Bound spec texture: " << specTex << ",texID = " << textures[specTex] << ", buffer = " << v <<  std::endl;
 	}
 	glActiveTexture( GL_TEXTURE0 );
 }
@@ -349,8 +363,10 @@ void drawObject(Object * obj , double dt){
 	
 	int texHandle = glGetUniformLocation(programId, "texMap");
 	int texHandleNorm = glGetUniformLocation(programId, "texMapNormal");
+	int texHandleSpec = glGetUniformLocation(programId, "texMapSpec");
 	glUniform1i(texHandle,0);
 	glUniform1i(texHandleNorm,1);
+	glUniform1i(texHandleSpec,2);
 	
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=obj->data.begin(); item!=obj->data.end(); ++item){
 		
@@ -407,9 +423,9 @@ void render( double dt ){
 	renderGround();
 	
 	
+	drawObject(cottage,-1);
 	drawObject(rock,-1);
 	drawObject(plane,dt);
-	//drawObject(cottage,-1);
 	
 	
 	glFlush();
@@ -558,7 +574,6 @@ int main(int argc, char** argv){
 	// Initialise OpenGL state
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 // Setup rendering
 	
@@ -576,8 +591,8 @@ int main(int argc, char** argv){
 	rock->loadFile("models/rock/rock_v2.obj");
 	loadVao(rock);
 	
-	//cottage->loadFile("models/cottage/cottage.obj");
-	//loadVao(cottage);
+	cottage->loadFile("models/cottage/cottage.obj");
+	loadVao(cottage);
 	
 	
 // Initialise callbacks

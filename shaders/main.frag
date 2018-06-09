@@ -7,8 +7,12 @@ in vec2 st;
 
 uniform sampler2D texMap;
 uniform sampler2D texMapNormal;
+uniform sampler2D texMapSpec;
+
 uniform bool enableTexMap;
 uniform bool enableTexMapNorm;
+uniform bool enableTexMapSpec;
+
 out vec4 fragColour;
 
 uniform vec4 overheadlight_dir;
@@ -48,8 +52,16 @@ vec3 overheadPhongDirLight(in vec4 position, in vec3 norm){
     if ( sDotN > 0.0 )
 		spec = overheadlight_specular * mtl_specular *
              pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
-
-    return ( ambient + diffuse * vec3(texture(texMap, st)) + spec );
+			 
+	if (enableTexMap){
+		diffuse = diffuse * vec3(texture(texMap, st));
+	}
+	
+	if (enableTexMapSpec){
+		spec = spec * vec3(texture(texMapSpec, st));
+	}
+	
+    return ( ambient + diffuse + spec );
 }
 /* 
 vec3 headBlingPhongPointLight(in vec4 position, in vec3 norm){

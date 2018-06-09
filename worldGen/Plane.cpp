@@ -24,8 +24,7 @@ void Plane::resetPos(double dt){
 	rpy = glm::vec3( 0.0 , 0.0 , DEG2RAD(180) );	// Roll pitch yaw (radians)
 	pos = glm::vec3(0.0);	// x y z position
 	posMat = glm::mat4();
-	pos.y = 2.5;
-	pos.z = 4.5;
+	pos.y = 1.0;
 	posMat[3][2] = h;
 	
 	lastUpdate = dt;
@@ -57,6 +56,7 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 		xRot = true;
 		rpy.y = rpy.y - dt;
 	}
+	/* 
 	if (rpy.y > 0.05){
 		pos.y = pos.y + 0.05*rpy.y;
 	}
@@ -69,7 +69,7 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	}
 	else if (rpy.z < 0.05){
 		pos.x = pos.x - 0.05*rpy.x;
-	}
+	} */
 	updatePosMat(zRot,xRot);
 	// pos.x = pos.x + v * (dt);
 	// pos.z = pos.z + v * (dt);
