@@ -211,18 +211,21 @@ void renderOverheadLight(tinyobj::material_t* material , int programId){
 	// Set the material properties based on the given shape info
 	glUniform1f(shininessHandle,material->shininess);
 	
-	glUniform3f(ambientMtlHandle,
+	glUniform4f(ambientMtlHandle,
 			material->ambient[0],
 			material->ambient[1],
-			material->ambient[2]);
-	glUniform3f(diffuseMtlHandle,
+			material->ambient[2],
+			1.0);
+	glUniform4f(diffuseMtlHandle,
 			material->diffuse[0],
 			material->diffuse[1],
-			material->diffuse[2]);
-	glUniform3f(specularMtlHandle,
+			material->diffuse[2],
+			1.0);
+	glUniform4f(specularMtlHandle,
 			material->specular[0],
 			material->specular[1],
-			material->specular[2]);
+			material->specular[2],
+			1.0);
 			
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 	
@@ -233,9 +236,9 @@ void renderOverheadLight(tinyobj::material_t* material , int programId){
 	
 	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
 	
-	glUniform3f(overheadAmbHandle,ambient.x,ambient.y,ambient.z);
-	glUniform3f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z);
-	glUniform3f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z);
+	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
+	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
+	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
 	
 	
 }

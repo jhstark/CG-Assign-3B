@@ -20,45 +20,45 @@ uniform vec4 yellowlight_pos;
 
 uniform int lightingMode;
 
-uniform vec3 overheadlight_ambient;     // Light ambient RGBA values
-uniform vec3 overheadlight_diffuse;     // Light diffuse RGBA values  
-uniform vec3 overheadlight_specular;    // Light specular RGBA values
+uniform vec4 overheadlight_ambient;     // Light ambient RGBA values
+uniform vec4 overheadlight_diffuse;     // Light diffuse RGBA values  
+uniform vec4 overheadlight_specular;    // Light specular RGBA values
 /* 
 uniform vec3 spotlight_ambient;     // Light ambient RGBA values
 uniform vec3 spotlight_diffuse;     // Light diffuse RGBA values  
 uniform vec3 spotlight_specular;    // Light specular RGBA values
 */
-uniform vec3 mtl_ambient;  // Ambient surface colour
-uniform vec3 mtl_diffuse;  // Diffuse surface colour
-uniform vec3 mtl_specular; // Specular surface colour
+uniform vec4 mtl_ambient;  // Ambient surface colour
+uniform vec4 mtl_diffuse;  // Diffuse surface colour
+uniform vec4 mtl_specular; // Specular surface colour
 
 uniform float shininess; // Specular surface colour
 
 
-vec3 overheadPhongDirLight(in vec4 position, in vec3 norm){
+vec4 overheadPhongDirLight(in vec4 position, in vec3 norm){
 
-    vec3 lightDir   = normalize(vec3(-overheadlight_dir));
-	vec3 viewDir    = normalize(vec3(vec4(0.0, 0.0, 1.0,0) - position));
+    vec3 lightDir   = normalize(-overheadlight_dir.xyz);
+	vec3 viewDir    = normalize(vec4(0.0, 0.0, 1.0,0) - position).xyz;
 	vec3 halfwayDir = normalize(lightDir + viewDir);
     
-    vec3 ambient = overheadlight_ambient * mtl_ambient;
+    vec4 ambient = overheadlight_ambient * mtl_ambient;
 	
     // The diffuse component
     float sDotN = max( dot(norm,lightDir), 0.0 );
-    vec3 diffuse = overheadlight_diffuse * mtl_diffuse * sDotN;
+    vec4 diffuse = overheadlight_diffuse * mtl_diffuse * sDotN;
 
     // The specular component
-    vec3 spec = vec3(0.0);
+    vec4 spec = vec4(0.0);
     if ( sDotN > 0.0 )
 		spec = overheadlight_specular * mtl_specular *
              pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
 			 
 	if (enableTexMap){
-		diffuse = diffuse * vec3(texture(texMap, st));
+		diffuse = diffuse * texture(texMap, st);
 	}
 	
 	if (enableTexMapSpec){
-		spec = spec * vec3(texture(texMapSpec, st));
+		spec = spec * texture(texMapSpec, st);
 	}
 	
     return ( ambient + diffuse + spec );
@@ -119,8 +119,7 @@ void main(void) {
 		//N =  normalize(2.0*NN.xyz-1.0);
     }
 	
-	light.xyz = overheadPhongDirLight(vertex, normalize(N));
-	light = vec4(light.xyz,1.0);
+	light = overheadPhongDirLight(vertex, normalize(N));
 	
 	fragColour = light; //texture(texMap, st);
 	
