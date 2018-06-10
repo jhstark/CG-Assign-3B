@@ -138,6 +138,90 @@ void setProjection(){
 	}
 	
 }
+
+//function to set up overhead light
+void renderOverheadLight(int programId){
+	// Overhead light source
+	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
+	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
+	int overheadDiffHandle = glGetUniformLocation(programId, "overheadlight_diffuse");
+	int overheadSpecHandle = glGetUniformLocation(programId, "overheadlight_specular");
+	
+	/* 	
+	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
+		std::cout << "Can't find uniforms for overhead light" << std::endl;
+		exit(1);
+	} */
+			
+	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
+	
+	// Send the overhead light properties
+	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 0.0f };
+	glUniform4fv(overheadHandle, 1, overheadLightDir); 
+	
+	
+	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
+	
+	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
+	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
+	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
+}
+
+//function to set up material values, where material is an optional argument
+void setupMaterials(int programId, tinyobj::material_t* material = NULL){
+
+	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
+	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
+	int specularMtlHandle = glGetUniformLocation(programId, "mtl_specular");
+	int shininessHandle = glGetUniformLocation(programId, "shininess");
+
+	/* 	if (ambientMtlHandle == -1 || diffuseMtlHandle == -1 || specularMtlHandle == -1 || shininessHandle == -1){
+		std::cout << "Can't find uniforms for material properties" << std::endl;
+		exit(1);
+	}
+	 */
+
+	 //if we specify a material, use values from that
+	 if(material != NULL){
+
+		glUniform1f(shininessHandle,material->shininess);
+		glUniform4f(ambientMtlHandle,
+				material->ambient[0],
+				material->ambient[1],
+				material->ambient[2],
+				1.0);
+		glUniform4f(diffuseMtlHandle,
+				material->diffuse[0],
+				material->diffuse[1],
+				material->diffuse[2],
+				1.0);
+		glUniform4f(specularMtlHandle,
+				material->specular[0],
+				material->specular[1],
+				material->specular[2],
+				1.0);
+
+	}
+	//otherwise, set default material values
+	else{
+		glUniform1f(shininessHandle,0.0f);
+		glUniform4f(ambientMtlHandle,
+				0.5,
+				0.5,
+				0.5,
+				1.0);
+		glUniform4f(diffuseMtlHandle,
+				0.6,
+				0.6,
+				0.6,
+				1.0);
+		glUniform4f(specularMtlHandle,
+				0.7,
+				0.7,
+				0.7,
+				1.0);
+	}
+}
 	   
 void renderGround(){
 	
@@ -167,6 +251,12 @@ void renderGround(){
 			//scale and translate
 			// Set pos using ground->pos = glm::vec3( x , y , z)
 			glm::vec3 pos = ground->getPos();
+
+			//set up materials
+			setupMaterials(programId);
+			//overheadlight
+			renderOverheadLight(programId);
+
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(ground->scale)); 
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 
@@ -185,64 +275,6 @@ void renderGround(){
 	
 }
 
-void renderOverheadLight(tinyobj::material_t* material , int programId){
-	
-	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
-	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
-	int specularMtlHandle = glGetUniformLocation(programId, "mtl_specular");
-	int shininessHandle = glGetUniformLocation(programId, "shininess");
-	
-/* 	if (ambientMtlHandle == -1 || diffuseMtlHandle == -1 || specularMtlHandle == -1 || shininessHandle == -1){
-		std::cout << "Can't find uniforms for material properties" << std::endl;
-		exit(1);
-	}
-	 */
-	// Overhead light source
-	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
-	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
-	int overheadDiffHandle = glGetUniformLocation(programId, "overheadlight_diffuse");
-	int overheadSpecHandle = glGetUniformLocation(programId, "overheadlight_specular");
-	
-/* 	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
-		std::cout << "Can't find uniforms for overhead light" << std::endl;
-		exit(1);
-	} */
-	
-	
-	// Set the material properties based on the given shape info
-	glUniform1f(shininessHandle,material->shininess);
-	
-	glUniform4f(ambientMtlHandle,
-			material->ambient[0],
-			material->ambient[1],
-			material->ambient[2],
-			1.0);
-	glUniform4f(diffuseMtlHandle,
-			material->diffuse[0],
-			material->diffuse[1],
-			material->diffuse[2],
-			1.0);
-	glUniform4f(specularMtlHandle,
-			material->specular[0],
-			material->specular[1],
-			material->specular[2],
-			1.0);
-			
-	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
-	
-	// Send the overhead light properties
-	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 1.0f };
-	glUniform4fv(overheadHandle, 1, overheadLightDir); 
-	
-	
-	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
-	
-	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
-	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
-	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
-	
-	
-}
 
 void renderAircraftLight(){
 	glm::vec3 direction = glm::vec3( 0.0, -1.0, 0.0 ); //Straight down until there is a vector that represents the aircraft orientation
@@ -325,7 +357,8 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		
 		glm::vec3 pos = obj->getPos();
 		
-		renderOverheadLight(material,programId);
+		setupMaterials(programId, material);
+		renderOverheadLight(programId);
 		
 		
 		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );

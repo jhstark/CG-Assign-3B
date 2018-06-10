@@ -12,7 +12,8 @@ uniform vec3 Kd;
 
 out vec3 fragCol;
 out vec3 normal;
-out vec3 vertPos;
+out vec3 vertex;
+out vec2 st;
 
 void main(void) {
 
@@ -22,7 +23,8 @@ void main(void) {
 	fragCol = Kd;
 	
     normal = normalize(normalMatrix * a_normal);
+	st = mat2(vec2(1.0 , 0.0) , vec2(0.0, -1.0)) * a_texture;
 
-	vertPos = a_vertex;
+	vertex = a_vertex;
 	
 }
