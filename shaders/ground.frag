@@ -88,15 +88,88 @@ vec4 overheadPhongDirLight(bool isTextured, vec3 colour){
     return ( ambient + diffuse + spec );
 }
 
+float random (vec2 s) {
+    return fract(sin(dot(s.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123);
+}
+
+vec2 random2(vec2 s){
+	s = vec2( dot(s,vec2(127.1,311.7)), dot(s,vec2(269.5,183.3)) );
+	return -1.0 + 2.0*fract(sin(s)*43758.5453123);
+}
+
+float noise (vec2 pos) {
+    vec2 i = floor(pos);
+    vec2 f = fract(pos);
+
+    //four courners
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    //cubic hermine curve
+    vec2 u = f*f*(3.0-2.0*f);
+
+    // mix corners
+    return mix(a, b, u.x) +
+            (c - a)* u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
+}
+
+float splat(vec2 pos) {
+	vec2 i = floor(pos);
+    vec2 f = fract(pos);
+
+    vec2 u = f*f*(3.0-2.0*f);
+
+    return mix( mix( dot( random2(i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ),
+                     dot( random2(i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                mix( dot( random2(i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ),
+                     dot( random2(i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+}
+
+vec3 proceduralTex(float scale, int t){
+	vec3 result;
+
+	//scale of our noise
+	vec2 pos = st*scale;
+	float n;
+
+	if(t == 0){
+		//generate noise
+		n = noise(pos);
+	}
+	else{
+		//generate blended splater
+		pos += noise2(pos*2.0);
+		n = 1.0 * smoothstep(0.15,0.34,noise(pos));
+    	n += smoothstep(.15,.34,noise(pos*7.));
+	}
+
+	result = vec3(n);
+	return result;
+}
+
 
 void main(void){
 	vec4 colour;
 	vec3 base = vec3(1, 1, 1);
 	float r, p;
 
-	vec3 grass = vec3(0.05, 0.4, 0.1);
-	vec3 mountain = vec3(0.7, 0.7, 0.7);
-	vec3 beach = vec3(0.8, 0.8, 0.5);
+	vec3 grass = vec3(0.05, 0.2, 0.05);
+	vec3 mountain = vec3(0.8, 0.8, 0.8);
+	vec3 beach = vec3(0.4, 0.4, 0.25);
+
+	//apply procedural to grass
+	grass = grass + 0.35*proceduralTex(5.0, 0);
+
+	//apply procedural to beach
+	beach = beach + 0.8*proceduralTex(0.5, 0);
+
+	//apply splatter procedural to mountain
+	mountain = 0.4*vec3(mountain.x, (mountain.y - 0.4*proceduralTex(6.0, 1).y), (mountain.z - 0.7*proceduralTex(6.0, 1).z));
 
 	vec4 diffuse = getDiffuse();
 	vec4 ambient = getAmbient();
