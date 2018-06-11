@@ -13,6 +13,7 @@ class Plane:public Object{
 	public:
 		Plane(float);		// Sets initial values
 		void updatePos(std::map< std::string , bool > , double);
+		void updateVelocity(float);
 		void resetPos(double);
 		glm::mat4 getModelMat();
 		

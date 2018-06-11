@@ -13,7 +13,7 @@
 
 Plane::Plane(float scale) : Object(scale){
 	
-	v = 1.0;
+	v = 0.0;
 	h = 5.0;
 	
 	resetPos(0.0);
@@ -31,13 +31,17 @@ void Plane::resetPos(double dt){
 	
 }
 
+void Plane::updateVelocity(float new_v){
+	v = new_v;
+}
+
 void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset){
 	
 	double dt = timeOffset - lastUpdate;
 	bool xRot,yRot,zRot = false; 
 	lastRpy = rpy;
 	
-	// Change yaw on left and right arrow
+	// Change yaw on left and right arrows
 	if (keyPress["left"] == true){
 		zRot = true;
 		rpy.z = rpy.z + dt;
@@ -47,35 +51,25 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 		rpy.z = rpy.z - dt;
 	}
 	
-	// Change pitch on left and right arrow
+	// Change pitch on up and down arrows
 	if (keyPress["up"] == true){
-		xRot = true;
-		rpy.y = rpy.y + dt;
-	}
-	if (keyPress["down"] == true){
 		xRot = true;
 		rpy.y = rpy.y - dt;
 	}
-	/* 
-	if (rpy.y > 0.05){
-		pos.y = pos.y + 0.05*rpy.y;
-	}
-	else if (rpy.y < 0.05){
-		pos.y = pos.y - 0.05*rpy.y;
+	if (keyPress["down"] == true){
+		xRot = true;
+		rpy.y = rpy.y + dt;
 	}
 	
-	if (rpy.z > 0.05){
-		pos.x = pos.x + 0.05*rpy.x;
-	}
-	else if (rpy.z < 0.05){
-		pos.x = pos.x - 0.05*rpy.x;
-	} */
+	float tan_y = std::min(tan(rpy.y), 10.0);
+	
+	pos.x += (v * sin(rpy.z))/250;
+	pos.z += (v * cos(rpy.z))/250;	
+	pos.y -= (v * tan_y)/250;
+	
 	updatePosMat(zRot,xRot);
-	// pos.x = pos.x + v * (dt);
-	// pos.z = pos.z + v * (dt);
 	
 	lastUpdate = timeOffset;
-	
 }
 
 void Plane::updatePosMat(bool zRot, bool yRot){

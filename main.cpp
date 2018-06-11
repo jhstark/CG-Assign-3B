@@ -507,6 +507,37 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_D:
 				keyPress["d"] = true;
 				break;
+			case GLFW_KEY_0:
+				plane->updateVelocity(0.0);
+				break;
+			case GLFW_KEY_1:
+				plane->updateVelocity(1.0);
+				break;
+			case GLFW_KEY_2:
+				plane->updateVelocity(2.0);
+				break;
+			case GLFW_KEY_3:
+				plane->updateVelocity(3.0);
+				break;
+			case GLFW_KEY_4:
+				plane->updateVelocity(4.0);
+				break;
+			case GLFW_KEY_5:
+				plane->updateVelocity(5.0);
+				break;
+			case GLFW_KEY_6:
+				plane->updateVelocity(6.0);
+				break;
+			case GLFW_KEY_7:
+				plane->updateVelocity(7.0);
+				break;
+			case GLFW_KEY_8:
+				plane->updateVelocity(8.0);
+				break;
+			case GLFW_KEY_9:
+				plane->updateVelocity(9.0);
+				break;
+
 			case GLFW_KEY_B:
 				if ( polygonMode == GL_LINE ) {
 					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
