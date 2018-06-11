@@ -53,7 +53,7 @@ void Camera::update(glm::vec3 pos,glm::vec3 dir){
 	}
 	else{
 		glm::vec3 at(pos.x, pos.y, pos.z);
-		glm::vec3 from(pos.x - 3 * sin(dir.z), pos.y + 1.0, pos.z - 3 * cos(dir.z));
+		glm::vec3 from(pos.x - 3 * sin(dir.z), pos.y + std::min(tan(dir.y), 10.0f), pos.z - 3 * cos(dir.z));
 		viewMtx = glm::lookAt(from, at, up);
 	}
 	//viewMtx = glm::lookAt(eye, at, up);
