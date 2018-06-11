@@ -452,8 +452,8 @@ void render( double dt ){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
 	
-	camera->update(keyPress);
-	
+
+	camera->update(plane->getPos(),plane->direction);
 	renderSkyBox();
 	renderGround();
 	
@@ -529,18 +529,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_RIGHT:
 				keyPress["right"] = true;
 				break;
-			case GLFW_KEY_W:
-				keyPress["w"] = true;
-				break;
-			case GLFW_KEY_A:
-				keyPress["a"] = true;
-				break;
-			case GLFW_KEY_S:
-				keyPress["s"] = true;
-				break;
-			case GLFW_KEY_D:
-				keyPress["d"] = true;
-				break;
 			case GLFW_KEY_0:
 				plane->updateVelocity(0.0);
 				break;
@@ -571,7 +559,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_9:
 				plane->updateVelocity(9.0);
 				break;
-
+			case GLFW_KEY_C:
+				camera->switchCam();
+				break;
 			case GLFW_KEY_B:
 				if ( polygonMode == GL_LINE ) {
 					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );

@@ -62,7 +62,7 @@ vec4 getSpec(){
 vec4 overheadPhongDirLight(bool isTextured, vec3 colour){
 	vec3 norm = normalize(normal);
 	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	vec3 viewDir    = normalize(vec4(0.0, 0.0, 1.0,0) - vertex).xyz;
+	vec3 viewDir    = normalize(vec3(0.0, 0.0, 1.0) - vertex);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
     
     vec4 ambient = overheadlight_ambient * mtl_ambient;

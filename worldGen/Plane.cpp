@@ -40,16 +40,37 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	double dt = timeOffset - lastUpdate;
 	bool xRot,yRot,zRot = false; 
 	lastRpy = rpy;
+	lastPos = pos;
+	float vTemp = v + abs(1/rpy.x);
+	
+	if (vTemp == 0){
+		vTemp = 1;
+	}
+	
+	float rotSpeed  = 2.0 / vTemp;
 	
 	// Change yaw on left and right arrows
 	if (keyPress["left"] == true){
 		zRot = true;
-		rpy.z = rpy.z + dt;
+		rpy.z = rpy.z + rotSpeed * dt;
+		rpy.x = std::max(rpy.x - 0.05,-0.8) ;
 	}
+	
 	if (keyPress["right"] == true){
 		zRot = true;
-		rpy.z = rpy.z - dt;
+		rpy.z = rpy.z - rotSpeed * dt;
+		rpy.x = std::min(rpy.x + 0.05,0.8);
 	}
+	
+	if (keyPress["right"] == false && keyPress["left"] == false){
+		if (rpy.x > 0.0){
+			rpy.x = std::max(rpy.x - 0.1,0.0) ;
+		}
+		else if (rpy.x < 0.0){
+			rpy.x = std::min(rpy.x + 0.1,0.0) ;
+		}
+	}
+	
 	
 	// Change pitch on up and down arrows
 	if (keyPress["up"] == true){
@@ -67,6 +88,10 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	pos.z += (v * cos(rpy.z))/250;	
 	pos.y -= (v * tan_y)/250;
 	
+	direction = rpy;
+	
+	
+	//std::cout <<sin(rpy.x)<<","<<sin(rpy.y)<<","<<sin(rpy.z)<<std::endl;
 	updatePosMat(zRot,xRot);
 	
 	lastUpdate = timeOffset;
@@ -91,27 +116,6 @@ void Plane::updatePosMat(bool zRot, bool yRot){
 		posY = glm::vec3(sinZ * posMat[0][1] , cosZ * posMat[1][1] , posMat[2][1]);
 		
 	}
-	
-	/* // Rotate about the model's y axis.
-	if ( yRot )
-	{
-		float sinY = sin(lastRpy.x - rpy.x);
-		float cosY = cos(lastRpy.x - rpy.x);
-
-		glm::vec3 tmpX = posX;
-		posX = cosY*tmpX + sinY*posZ;
-		posZ = -sinY*tmpX + cosY*posZ;
-	}
-	// Rotate about the model's x axis.
-	if ( xRot )
-	{
-		float sinX = sin(lastRpy.z - rpy.z);
-		float cosX = cos(lastRpy.z - rpy.z);
-
-		glm::vec3 tmpY = posY;
-		posY = cosX*tmpY - sinX*posZ;
-		posZ = sinX*tmpY + cosX*posZ;
-	} */
 
 	// Update the model matrix with new eye axes.
 	posMat[0][0] = posX[0];
@@ -125,6 +129,19 @@ void Plane::updatePosMat(bool zRot, bool yRot){
 	posMat[0][2] = posZ[0];
 	posMat[1][2] = posZ[1];
 	posMat[2][2] = posZ[2];
+	
+/* 	std::cout << " --------------------- " << std::endl;
+	
+	for (int i=0;i<4;i++){
+		std::cout << "(";
+		for (int j=0;j<4;j++){
+			std::cout << posMat[i][j] << ",";
+		}
+		std::cout << ")" << std::endl;
+	}
+	
+	std::cout << " --------------------- " << std::endl; */
+	
 }
 
 glm::mat4 Plane::getModelMat(){

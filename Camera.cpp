@@ -27,6 +27,17 @@ void Camera::lookAt(glm::vec3 pos){
 	
 }
 
+void Camera::switchCam(){
+	
+	if (type == "fixed"){
+		type = "follow";
+	}
+	else{
+		type = "fixed";
+	}
+	std::cout << "Camera set to: " << type << std::endl;
+}
+
 void Camera::followPlane(glm::vec3 pos){
 	
 	glm::vec3 at(pos.x, pos.y, pos.z);
@@ -36,19 +47,15 @@ void Camera::followPlane(glm::vec3 pos){
 	
 }
 
-void Camera::update(std::map< std::string , bool > keyPress){
-	if (keyPress["w"]){
-		eye.z = eye.z-0.5;
+void Camera::update(glm::vec3 pos,glm::vec3 dir){
+	if (type == "fixed"){
+		lookAt(pos);
 	}
-	if (keyPress["s"]){
-		eye.z = eye.z+0.5;
+	else{
+		glm::vec3 at(pos.x, pos.y, pos.z);
+		glm::vec3 from(pos.x - 3 * sin(dir.z), pos.y + std::min(tan(dir.y), 10.0f), pos.z - 3 * cos(dir.z));
+		viewMtx = glm::lookAt(from, at, up);
 	}
-	if (keyPress["a"]){
-		eye.x = eye.x-0.5;
-	}
-	if (keyPress["d"]){
-		eye.x = eye.x+0.5;
-	}
-	viewMtx = glm::lookAt(eye, at, up);
+	//viewMtx = glm::lookAt(eye, at, up);
 }
 	
