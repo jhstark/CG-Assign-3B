@@ -54,11 +54,11 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	// Change pitch on up and down arrows
 	if (keyPress["up"] == true){
 		xRot = true;
-		rpy.y = rpy.y - dt;
+		rpy.y = std::max(rpy.y - dt, -1.3);
 	}
 	if (keyPress["down"] == true){
 		xRot = true;
-		rpy.y = rpy.y + dt;
+		rpy.y = std::min(rpy.y + dt, 1.3);
 	}
 	
 	float tan_y = std::min(tan(rpy.y), 10.0);
