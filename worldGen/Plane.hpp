@@ -16,11 +16,13 @@ class Plane:public Object{
 		void updateVelocity(float);
 		void resetPos(double);
 		glm::mat4 getModelMat();
+		glm::vec3 direction;
 		
 	private:
 		float v;			// velocity unit per second
 		float h;			// height units
 		glm::vec3 lastRpy = glm::vec3(0.0); // Roll pitch yaw (radians)
+		glm::vec3 lastPos = glm::vec3(0.0);
 		glm::mat4 posMat;
 		void updatePosMat(bool, bool);
 		double lastUpdate;
