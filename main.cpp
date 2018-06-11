@@ -420,20 +420,52 @@ void drawObject(Object * obj , double dt){
 }
 
 //function to handle collision
+//if you change pos and scale of ground this will probably break
 void handleCollision(){
 	glm::vec3 planePos = plane->getPos();
 	glm::vec3 groundPos = ground->getPos();
-	glm::vec3 maxes(0.5, 1.1, 0.5);
-	glm::vec3 mins(-0.5, 0.335, -0.5);
+	std::vector<std::vector<int> > heightMap = ground->heightMap;
+	glm::vec3 maxes(1, 1.1, 1);
+	glm::vec3 mins(-1, 0.335, -1);
 	float maxX = 0.5;
 	float minX = -0.5;
 	float scale = ground->scale;
+	float x, y, z;
+	float h;
 
+	//distance from point to check for
+	float radius= 0.01f;
+
+	//get 0-1 coords
+	x = (planePos.x / scale) - scale*groundPos.x - 1.4;
+	z = planePos.z / scale + 0.5;
+	y = (planePos.y - scale*groundPos.y)/scale;
+	//keep within bounds
+	if(x < 0){
+		x = 0;
+	}
+	if(z < 0){
+		z = 0;
+	}
+	if(x > 1){
+		x = 1;
+	}
+	if(z > 1){
+		z = 1;
+	}
+	//get as fraction of hm size
+	x = x*(heightMap.size()-1);
+	z = z*(heightMap.size()-1);
+
+	//get floor of
+	x = floor(x);
+	z = floor(z);
+	h = heightMap[x][z];
+	h = h/(heightMap.size()-1);
 
 	//preform scaling on maxes and mins
 	maxes = maxes * scale;
 	mins = mins * scale;
-
 
 	//offset
 	maxes.x += scale*groundPos.x;
@@ -443,16 +475,26 @@ void handleCollision(){
 
 	//bounding box
 	if(planePos.x > maxes.x || planePos.x < mins.x){
-		//stop plane
+		//reset pos and stop
 		plane->updateVelocity(0.0);
+		plane->resetPos(0.0);
 	}
 	if(planePos.y > maxes.y || planePos.y < mins.y){
-		//stop plane
+		//reset pos and stop
 		plane->updateVelocity(0.0);
+		plane->resetPos(0.0);
 	}
 	if(planePos.z > maxes.z || planePos.z < mins.z){
-		//stop plane
+		//reset pos and stop
 		plane->updateVelocity(0.0);
+		plane->resetPos(0.0);
+	}
+
+	//terrain
+	if(y-radius < h){
+		//reset pos and stop
+		plane->updateVelocity(0.0);
+		plane->resetPos(0.0);
 	}
 }
 
