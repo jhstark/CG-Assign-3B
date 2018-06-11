@@ -161,6 +161,7 @@ void main(void){
 	vec3 grass = vec3(0.05, 0.2, 0.05);
 	vec3 mountain = vec3(0.8, 0.8, 0.8);
 	vec3 beach = vec3(0.4, 0.4, 0.25);
+	vec3 snow= vec3(1, 1, 1);
 
 	//apply procedural to grass
 	grass = grass + 0.35*proceduralTex(5.0, 0);
@@ -185,6 +186,7 @@ void main(void){
 
 	colour = vec4(base, 1.0f);
 
+
 	//green top fade
 	if(vertex.y > 0.6 && vertex.y < 0.7){
 		r = vertex.y - 0.6;
@@ -202,28 +204,12 @@ void main(void){
 		colour = vec4(base*(1-p), 1.0f) + vec4(grass*p, 1.0f);
 	}
 
-
-	
-
-	// vec3 grass = vec3(0.3, 0.7, 0.3);
-	// vec3 mountain = vec3(0.7, 0.7, 0.7);
-	// vec3 beach = vec3(0.8, 0.8, 0.5);
-	// vec3 colour = vec3(0, 0, 0);
-	// float r;
-
-	// if(vertPos.y > 0.57){
-	// 	colour = mountain;
-	// 	r = vertPos.y - 0.57;
-	// 	colour = 1.7*(r*1.75 * colour);
-	// }
-	// if(vertPos.y < 0.4){
-	// 	colour = beach;
-	// 	r = vertPos.y * 2.5;
-	// 	colour = 3*((1-r) * colour);
-	// }
-	
-
-	// fragColour = vec4(colour+grass, 1.0);
+	//snow
+	if(vertex.y > 0.75){
+		r = vertex.y - 0.75;
+		p = r*10;
+		colour = colour + vec4(snow*p, 1.0f);
+	}
 
 	fragColour = ambient + diffuse * colour + specular*colour;
 }
