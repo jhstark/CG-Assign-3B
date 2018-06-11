@@ -26,7 +26,7 @@ Camera *camera = new Camera();
 // rpy = roll, pitch, yaw in radians from initial orientation
 
 Skybox *skybox = new Skybox(1.0);
-HeightMap *ground = new HeightMap(10.0f , "models/heightmap/Heightmap.png", 1.0f);
+HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
 
 Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
