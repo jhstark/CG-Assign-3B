@@ -419,6 +419,43 @@ void drawObject(Object * obj , double dt){
 	glBindVertexArray(0);
 }
 
+//function to handle collision
+void handleCollision(){
+	glm::vec3 planePos = plane->getPos();
+	glm::vec3 groundPos = ground->getPos();
+	glm::vec3 maxes(0.5, 1.1, 0.5);
+	glm::vec3 mins(-0.5, 0.335, -0.5);
+	float maxX = 0.5;
+	float minX = -0.5;
+	float scale = ground->scale;
+
+
+	//preform scaling on maxes and mins
+	maxes = maxes * scale;
+	mins = mins * scale;
+
+
+	//offset
+	maxes.x += scale*groundPos.x;
+	mins.x += scale*groundPos.x;
+	maxes.y += scale*groundPos.y;
+	mins.y += scale*groundPos.y;
+
+	//bounding box
+	if(planePos.x > maxes.x || planePos.x < mins.x){
+		//stop plane
+		plane->updateVelocity(0.0);
+	}
+	if(planePos.y > maxes.y || planePos.y < mins.y){
+		//stop plane
+		plane->updateVelocity(0.0);
+	}
+	if(planePos.z > maxes.z || planePos.z < mins.z){
+		//stop plane
+		plane->updateVelocity(0.0);
+	}
+}
+
 void renderSkyBox(){
 	
 	glDepthMask(GL_FALSE);
@@ -472,6 +509,7 @@ void render( double dt ){
 	
 	drawObject(tree,-1);
 	drawObject(plane,dt);
+	handleCollision();
 	
 	
 	glFlush();
