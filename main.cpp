@@ -19,6 +19,7 @@
 #include "worldGen/Plane.hpp"
 #include "worldGen/Landscape.hpp"
 #include "worldGen/HeightMap.hpp"
+#include "worldGen/Water.hpp"
 
 Camera *camera = new Camera();
 
@@ -29,6 +30,7 @@ Camera *camera = new Camera();
 
 Skybox *skybox = new Skybox(1.0);
 HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
+Water *water = new Water(100.0f, 1.0f);
 
 Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
@@ -126,7 +128,7 @@ void setProjection(){
     glm::mat4 projection;
 	
     // glm::perspective(fovy, aspect, near, far)
-    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0); 
+    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 99999.0); 
 	
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 	//for (int i=0;i<programIdArr.size();i++){
@@ -263,6 +265,57 @@ void renderGround(){
 			renderOverheadLight(programId);
 
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(ground->scale)); 
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
+
+			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+			
+			// Calculate the normal transformation based on the current view and the model view
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
+			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+				
+			int vertexCount = 3 * ( Shapes.at(i).triangleCount );
+			glDrawArrays(GL_TRIANGLES,0,vertexCount);
+			
+		}
+	}
+	glBindVertexArray(0);
+	
+}
+
+void renderWater(){
+	int programId = programIdMap["debug"];
+
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=water->data.begin(); item!=water->data.end(); ++item){
+		
+		std::vector< Object::objShape > Shapes = item->second;
+		
+		for (int i=0;i<Shapes.size();i++){
+			
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glUseProgram( programId );
+			glBindVertexArray(vaoHandle);
+			
+			// Assign the view matrix
+			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
+			
+			// Assign the model view matrix
+			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+			int normHandle = glGetUniformLocation(programId, "normalMatrix");
+			
+			glm::mat4 mvMatrix;
+			glm::mat3 normMatrix;
+			
+			//scale and translate
+			// Set pos using ground->pos = glm::vec3( x , y , z)
+			glm::vec3 pos = water->getPos();
+
+			//set up materials
+			setupMaterials(programId);
+			//overheadlight
+			renderOverheadLight(programId);
+
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(water->scale)); 
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 
 			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
@@ -580,6 +633,7 @@ void render( double dt ){
 	camera->update(plane->getPos(),plane->direction);
 	renderSkyBox();
 	renderGround();
+	renderWater();
 	
 	
 	drawObject(cottage,-1);
@@ -780,9 +834,10 @@ int main(int argc, char** argv){
 	loadVao(skybox);
 	skybox->loadTexture();
 	loadVao(ground);
+	loadVao(water);
 	// ground->printVertices();
 	
-	 plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
+	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
 	//plane->loadFile("models/btest/Barrel02.obj");
 	loadVao(plane);
 	
