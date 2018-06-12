@@ -56,6 +56,7 @@ void loadShaders(){
 	programIdMap["main"] = LoadShaders("shaders/main.vert", "shaders/main.frag");
 	programIdMap["skybox"] = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
 	programIdMap["ground"] = LoadShaders("shaders/ground.vert", "shaders/ground.frag");
+	programIdMap["water"] = LoadShaders("shaders/water.vert", "shaders/water.frag");
 	
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
@@ -211,7 +212,7 @@ void setupMaterials(int programId, tinyobj::material_t* material = NULL){
 	}
 	//otherwise, set default material values
 	else{
-		glUniform1f(shininessHandle,0.0f);
+		glUniform1f(shininessHandle,0.1f);
 		glUniform4f(ambientMtlHandle,
 				0.5,
 				0.5,
@@ -223,9 +224,9 @@ void setupMaterials(int programId, tinyobj::material_t* material = NULL){
 				0.6,
 				1.0);
 		glUniform4f(specularMtlHandle,
-				0.7,
-				0.7,
-				0.7,
+				1.0,
+				1.0,
+				1.0,
 				1.0);
 	}
 }
@@ -283,7 +284,7 @@ void renderGround(){
 }
 
 void renderWater(){
-	int programId = programIdMap["debug"];
+	int programId = programIdMap["water"];
 
 	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=water->data.begin(); item!=water->data.end(); ++item){
 		
