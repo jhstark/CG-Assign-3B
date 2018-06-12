@@ -438,7 +438,8 @@ void handleCollision(){
 	glm::vec3 planePos = plane->getPos();
 	glm::vec3 groundPos = ground->getPos();
 	glm::vec3 currentPos;
-	float objRadius = 0.2f;
+	std::map< std::string,glm::vec3 > minMax;
+	glm::vec3 objRange;
 	std::vector<std::vector<int> > heightMap = ground->heightMap;
 	glm::vec3 maxes(1, 1.1, 1);
 	glm::vec3 mins(-1, 0.335, -1);
@@ -452,7 +453,7 @@ void handleCollision(){
 	//currently a single value, represents a square collision box
 	float radius= 0.015f;
 
-	//get 0-1 coords
+	//get coords as value between 0 and 1
 	x = (planePos.x / scale) - scale*groundPos.x - 1.4;
 	z = planePos.z / scale + 0.5;
 	y = (planePos.y - scale*groundPos.y)/scale;
@@ -507,14 +508,26 @@ void handleCollision(){
 
 	//rendered objects
 	for(int i=0; i<rendered.size(); i++){
+		//get point
 		currentPos = rendered[i].getPos();
+		//calculate xyz bounds
+		minMax = rendered[i].objFile.minMax;
+		objRange = minMax["max"]-minMax["min"];
+		//scale
+		objRange = objRange * rendered[i].scale;
+		//account for rotation by making square from max
+		objRange.x = fmax(objRange.x, objRange.z);
+		objRange.z = fmax(objRange.x, objRange.z);
+		//half
+		objRange = objRange/2.0f;
+
 		//x check
-		if(planePos.x+radius >= currentPos.x-objRadius && planePos.x-radius <= currentPos.x+objRadius){
+		if(planePos.x+radius >= currentPos.x-objRange.x && planePos.x-radius <= currentPos.x+objRange.x){
 			//z check
-			if(planePos.z+radius >= currentPos.z-objRadius && planePos.z-radius <= currentPos.z+objRadius){
+			if(planePos.z+radius >= currentPos.z-objRange.z && planePos.z-radius <= currentPos.z+objRange.z){
 				//y check
-				//all objs seem to have y pos as bottom, not centre so we take that into account
-				if(planePos.y+radius >= currentPos.y && planePos.y-radius <= currentPos.y+(2*objRadius)){
+				//all objs seem to have y pos as bottom not centre so we take that into account
+				if(planePos.y+radius >= currentPos.y && planePos.y-radius <= currentPos.y+(2*objRange.y)){
 					onCollision();
 				}
 			}
@@ -522,7 +535,7 @@ void handleCollision(){
 	}
 
 
-	//std::cout << planePos.y << std::endl;
+	//std::cout << planePos.x << std::endl;
 	//std::cout << currentPos.x << std::endl;
 
 }
