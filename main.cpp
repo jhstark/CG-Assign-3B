@@ -164,7 +164,7 @@ void renderOverheadLight(int programId){
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 	
 	// Send the overhead light properties
-	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 0.0f };
+	float overheadLightDir[4] = { 0.0, 10.0, 0.0, 0.0f };
 	glUniform4fv(overheadHandle, 1, overheadLightDir); 
 	
 	
@@ -176,7 +176,7 @@ void renderOverheadLight(int programId){
 }
 
 //function to set up material values, where material is an optional argument
-void setupMaterials(int programId, tinyobj::material_t* material = NULL){
+void setupMaterials(int programId, float shine, tinyobj::material_t* material = NULL){
 
 	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
 	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
@@ -212,7 +212,7 @@ void setupMaterials(int programId, tinyobj::material_t* material = NULL){
 	}
 	//otherwise, set default material values
 	else{
-		glUniform1f(shininessHandle,0.1f);
+		glUniform1f(shininessHandle,shine);
 		glUniform4f(ambientMtlHandle,
 				0.5,
 				0.5,
@@ -261,7 +261,7 @@ void renderGround(){
 			glm::vec3 pos = ground->getPos();
 
 			//set up materials
-			setupMaterials(programId);
+			setupMaterials(programId, 5.0f);
 			//overheadlight
 			renderOverheadLight(programId);
 
@@ -312,7 +312,7 @@ void renderWater(){
 			glm::vec3 pos = water->getPos();
 
 			//set up materials
-			setupMaterials(programId);
+			setupMaterials(programId, 100.0f);
 			//overheadlight
 			renderOverheadLight(programId);
 
@@ -416,7 +416,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		
 		glm::vec3 pos = obj->getPos();
 		
-		setupMaterials(programId, material);
+		setupMaterials(programId, 0.0f, material);
 		renderOverheadLight(programId);
 		
 		

@@ -30,7 +30,7 @@ std::vector<float> Water::findNormals(std::vector<float> vert){
 	    s3.y = vert.at(i+7);
 	    s3.z = vert.at(i+8);
 
-        N = glm::normalize(glm::cross(s2 - s1, s3 - s1));
+        N = glm::normalize(glm::cross(s3 - s1, s2 - s1));
 
         current[0] = s1.x;
         current[1] = s1.y;
