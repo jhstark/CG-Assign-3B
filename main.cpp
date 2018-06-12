@@ -36,8 +36,8 @@ Object *cottage = new Object( 0.05 , glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0 
 Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *tree = new Object( 0.1 , glm::vec3(-0.5 , 0.0 , -1.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
 
-//keep track of rendered objects that aren't ground, skybox and plane
-std::vector<Object> rendered;
+//objects to be checked for collision
+std::vector<Object> toCheck;
 
 
 std::map< std::string , bool > keyPress;
@@ -506,15 +506,15 @@ void handleCollision(){
 		onCollision();
 	}
 
-	//rendered objects
-	for(int i=0; i<rendered.size(); i++){
+	//rendered objects to check
+	for(int i=0; i<toCheck.size(); i++){
 		//get point
-		currentPos = rendered[i].getPos();
+		currentPos = toCheck[i].getPos();
 		//calculate xyz bounds
-		minMax = rendered[i].objFile.minMax;
+		minMax = toCheck[i].objFile.minMax;
 		objRange = minMax["max"]-minMax["min"];
 		//scale
-		objRange = objRange * rendered[i].scale;
+		objRange = objRange * toCheck[i].scale;
 		//account for rotation by making square from max
 		objRange.x = fmax(objRange.x, objRange.z);
 		objRange.z = fmax(objRange.x, objRange.z);
@@ -570,8 +570,8 @@ void renderSkyBox(){
 
 void render( double dt ){
 
-	//clear rendered vector
-	rendered.clear();
+	//clear check vector
+	toCheck.clear();
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
@@ -583,23 +583,23 @@ void render( double dt ){
 	
 	
 	drawObject(cottage,-1);
-	rendered.push_back(*cottage);
+	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
-	rendered.push_back(*rock);
+	toCheck.push_back(*rock);
 	drawObject(lampPost,-1);
-	rendered.push_back(*lampPost);
+	toCheck.push_back(*lampPost);
 	
 	tree->pos.x = -0.5;
 	tree->pos.z = -1.0;
 	
 	drawObject(tree,-1);
-	rendered.push_back(*tree);
+	toCheck.push_back(*tree);
 	
 	tree->pos.x = -1.0;
 	tree->pos.z = -1.5;
 	
 	drawObject(tree,-1);
-	rendered.push_back(*tree);
+	toCheck.push_back(*tree);
 	drawObject(plane,dt);
 	handleCollision();
 	
