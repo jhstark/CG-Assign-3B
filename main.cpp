@@ -527,7 +527,7 @@ void handleCollision(){
 			if(planePos.z+radius >= currentPos.z-objRange.z && planePos.z-radius <= currentPos.z+objRange.z){
 				//y check
 				//all objs seem to have y pos as bottom not centre so we take that into account
-				if(planePos.y+radius >= currentPos.y && planePos.y-radius <= currentPos.y+(2*objRange.y)){
+				if(planePos.y+radius >= currentPos.y && planePos.y-radius <= currentPos.y+(2.0f*objRange.y)){
 					onCollision();
 				}
 			}
