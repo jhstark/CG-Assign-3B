@@ -31,20 +31,22 @@ uniform vec4 mtl_specular; // Specular surface colour
 
 uniform float shininess; // Specular surface colour
 
-vec4 getDiffuse(){
+vec4 getDiffuse(vec4 c){
 	vec3 norm = normalize(normal);
 	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	float sDotN = max( dot(norm,lightDir), 0.0 );
-    vec4 diffuse = overheadlight_diffuse * mtl_diffuse * sDotN;
+	vec3 viewDir    = normalize(-vertex);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float sDotN = max( dot(norm,halfwayDir), 0.0 );
+    vec4 diffuse = overheadlight_diffuse * c * sDotN;
 	return diffuse;
 }
 
-vec4 getAmbient(){
-	vec4 ambient = overheadlight_ambient * mtl_ambient;
+vec4 getAmbient(vec4 c){
+	vec4 ambient = overheadlight_ambient * c;
 	return ambient;
 }
 
-vec4 getSpec(){
+vec4 getSpec(vec4 c){
 	vec3 norm = normalize(normal);
 	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
 	vec3 viewDir    = normalize(-vertex);
@@ -52,7 +54,7 @@ vec4 getSpec(){
 	float sDotN = max( dot(norm, halfwayDir), 0.0 );
 	vec4 spec = vec4(0.0);
     if ( sDotN > 0.0 ){
-		spec = overheadlight_specular * mtl_specular * pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
+		spec = overheadlight_specular * c * pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
 	}
 
 	return spec;
@@ -172,10 +174,6 @@ void main(void){
 	//apply splatter procedural to mountain
 	mountain = 0.4*vec3(mountain.x, (mountain.y - 0.4*proceduralTex(6.0, 1).y), (mountain.z - 0.7*proceduralTex(6.0, 1).z));
 
-	vec4 diffuse = getDiffuse();
-	vec4 ambient = getAmbient();
-	vec4 specular = getSpec();
-
 	//set base range
 	if(vertex.y > 0.6){
 		base = mountain;
@@ -211,5 +209,9 @@ void main(void){
 		colour = colour + vec4(snow*p, 1.0f);
 	}
 
-	fragColour = ambient + diffuse * colour + specular*colour;
+	vec4 diffuse = getDiffuse(colour);
+	vec4 ambient = getAmbient(mtl_ambient);
+	vec4 specular = getSpec(mtl_specular);
+
+	fragColour = ambient + diffuse + specular;
 }

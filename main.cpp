@@ -164,11 +164,11 @@ void renderOverheadLight(int programId){
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 	
 	// Send the overhead light properties
-	float overheadLightDir[4] = { 0.0, 10.0, 0.0, 0.0f };
+	float overheadLightDir[4] = { 0.0, 20.0, 0.0, 0.0f };
 	glUniform4fv(overheadHandle, 1, overheadLightDir); 
 	
 	
-	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
+	glm::vec3 sunRGB = glm::vec3(0.94 , 0.94 , 0.8);
 	
 	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
 	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
@@ -176,7 +176,7 @@ void renderOverheadLight(int programId){
 }
 
 //function to set up material values, where material is an optional argument
-void setupMaterials(int programId, float shine, tinyobj::material_t* material = NULL){
+void setupMaterials(int programId, float shine, glm::vec3 spec, tinyobj::material_t* material = NULL){
 
 	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
 	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
@@ -214,19 +214,19 @@ void setupMaterials(int programId, float shine, tinyobj::material_t* material = 
 	else{
 		glUniform1f(shininessHandle,shine);
 		glUniform4f(ambientMtlHandle,
-				0.5,
-				0.5,
-				0.5,
+				0.1,
+				0.1,
+				0.1,
 				1.0);
 		glUniform4f(diffuseMtlHandle,
 				0.6,
 				0.6,
 				0.6,
 				1.0);
-		glUniform4f(specularMtlHandle,
-				1.0,
-				1.0,
-				1.0,
+		glUniform4f(specularMtlHandle, 
+				spec.x,
+				spec.y,
+				spec.z,
 				1.0);
 	}
 }
@@ -261,7 +261,7 @@ void renderGround(){
 			glm::vec3 pos = ground->getPos();
 
 			//set up materials
-			setupMaterials(programId, 5.0f);
+			setupMaterials(programId, 0.1f, glm::vec3(0.1, 0.1, 0.1));
 			//overheadlight
 			renderOverheadLight(programId);
 
@@ -312,7 +312,7 @@ void renderWater(){
 			glm::vec3 pos = water->getPos();
 
 			//set up materials
-			setupMaterials(programId, 100.0f);
+			setupMaterials(programId, 200.0f, glm::vec3(0.5, 0.5, 0.5));
 			//overheadlight
 			renderOverheadLight(programId);
 
@@ -416,7 +416,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		
 		glm::vec3 pos = obj->getPos();
 		
-		setupMaterials(programId, 0.0f, material);
+		setupMaterials(programId, 0.0f, glm::vec3(0.0), material);
 		renderOverheadLight(programId);
 		
 		

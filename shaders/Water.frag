@@ -31,20 +31,22 @@ uniform vec4 mtl_specular; // Specular surface colour
 
 uniform float shininess; // Specular surface colour
 
-vec4 getDiffuse(){
+vec4 getDiffuse(vec4 c){
 	vec3 norm = normalize(normal);
 	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	float sDotN = max( dot(norm,lightDir), 0.0 );
-    vec4 diffuse = overheadlight_diffuse * mtl_diffuse * sDotN;
+	vec3 viewDir    = normalize(-vertex);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float sDotN = max( dot(norm,halfwayDir), 0.0 );
+    vec4 diffuse = overheadlight_diffuse * c * sDotN;
 	return diffuse;
 }
 
-vec4 getAmbient(){
-	vec4 ambient = overheadlight_ambient * mtl_ambient;
+vec4 getAmbient(vec4 c){
+	vec4 ambient = overheadlight_ambient * c;
 	return ambient;
 }
 
-vec4 getSpec(){
+vec4 getSpec(vec4 c){
 	vec3 norm = normalize(normal);
 	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
 	vec3 viewDir    = normalize(-vertex);
@@ -52,7 +54,7 @@ vec4 getSpec(){
 	float sDotN = max( dot(norm, halfwayDir), 0.0 );
 	vec4 spec = vec4(0.0);
     if ( sDotN > 0.0 ){
-		spec = overheadlight_specular * mtl_specular * pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
+		spec = overheadlight_specular * c * pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
 	}
 
 	return spec;
@@ -61,14 +63,13 @@ vec4 getSpec(){
 
 void main(void){
 	vec4 colour;
-	vec3 water = vec3(0.1, 0.2, 0.5);
+	vec3 water = vec3(0.15, 0.29, 0.44);
 
 	colour = vec4(water, 1.0);
 
-	vec4 diffuse = getDiffuse();
-	vec4 ambient = getAmbient();
-	vec4 specular = getSpec();
-	
+	vec4 diffuse = getDiffuse(colour);
+	vec4 ambient = getAmbient(mtl_ambient);
+	vec4 specular = getSpec(mtl_specular);
 
-	fragColour = ambient + colour * diffuse + colour * specular;
+	fragColour = ambient + diffuse + specular;
 }
