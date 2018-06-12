@@ -16,6 +16,7 @@ class Water:public Object{
         float proceduralGeom(float x, float z);
         std::vector<float> findNormals(std::vector<float>);
         std::vector<float> generateTexCoords(std::vector<float>, float size);
+        std::map<std::vector<float>, std::vector<glm::vec3> > nMap;
 };
 
 #endif
