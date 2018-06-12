@@ -11,15 +11,15 @@
 
 class HeightMap:public Object{
 	public:
-		HeightMap(float , std::string, float size);
-    private:
-        void loadHeightMap(std::string);
-        std::vector<float> findNormals(std::vector<float>);
-        std::vector<float> generateTexCoords(std::vector<float>, float size);
-        void generate(float size);
-        std::vector<std::vector<int> > heightMap;
-        int height;
-        int width;
+		  HeightMap(float , std::string, float size);
+      std::vector<std::vector<int> > heightMap;
+  private:
+      void loadHeightMap(std::string);
+      std::vector<float> findNormals(std::vector<float>);
+      std::vector<float> generateTexCoords(std::vector<float>, float size);
+      void generate(float size);
+      int height;
+      int width;
 };
 
 #endif

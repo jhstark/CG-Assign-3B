@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <thread>
+#include <chrono>
 
 #include "libraries/openglH.h"
 #include "constants.h"
@@ -26,13 +28,16 @@ Camera *camera = new Camera();
 // rpy = roll, pitch, yaw in radians from initial orientation
 
 Skybox *skybox = new Skybox(1.0);
-HeightMap *ground = new HeightMap(10.0f , "models/heightmap/Heightmap.png", 1.0f);
+HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
 
 Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( 0.05 , glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-120)) );
 Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *tree = new Object( 0.1 , glm::vec3(-0.5 , 0.0 , -1.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
+
+//objects to be checked for collision
+std::vector<Object> toCheck;
 
 
 std::map< std::string , bool > keyPress;
@@ -419,6 +424,122 @@ void drawObject(Object * obj , double dt){
 	glBindVertexArray(0);
 }
 
+//function to preform collision action of stop and reset plane
+void onCollision(){
+	plane->updateVelocity(0.0);
+	//wait, representing the crash. could replace this with an animation/fire/smoke or other indicator of crashing
+	std::this_thread::sleep_for(std::chrono::milliseconds(800));
+	plane->resetPos(0.0);
+}
+
+//function to handle collision, simple 1 point check
+//if you change pos and scale of ground this will probably break
+void handleCollision(){
+	glm::vec3 planePos = plane->getPos();
+	glm::vec3 groundPos = ground->getPos();
+	glm::vec3 currentPos;
+	std::map< std::string,glm::vec3 > minMax;
+	glm::vec3 objRange;
+	std::vector<std::vector<int> > heightMap = ground->heightMap;
+	glm::vec3 maxes(1, 1.1, 1);
+	glm::vec3 mins(-1, 0.335, -1);
+	float maxX = 0.5;
+	float minX = -0.5;
+	float scale = ground->scale;
+	float x, y, z;
+	float h;
+
+	//plane radius
+	//currently a single value, represents a square collision box
+	float radius= 0.015f;
+
+	//get coords as value between 0 and 1
+	x = (planePos.x / scale) - scale*groundPos.x - 1.4;
+	z = planePos.z / scale + 0.5;
+	y = (planePos.y - scale*groundPos.y)/scale;
+	//keep within bounds
+	if(x < 0){
+		x = 0;
+	}
+	if(z < 0){
+		z = 0;
+	}
+	if(x > 1){
+		x = 1;
+	}
+	if(z > 1){
+		z = 1;
+	}
+	//get as fraction of hm size
+	x = x*(heightMap.size()-1);
+	z = z*(heightMap.size()-1);
+
+	//get floor of
+	x = floor(x);
+	z = floor(z);
+	h = heightMap[x][z];
+	h = h/(heightMap.size()-1);
+
+	//preform scaling on maxes and mins
+	maxes = maxes * scale;
+	mins = mins * scale;
+
+	//offset
+	maxes.x += scale*groundPos.x;
+	mins.x += scale*groundPos.x;
+	maxes.y += scale*groundPos.y;
+	mins.y += scale*groundPos.y;
+
+	//bounding box
+	if(planePos.x-radius > maxes.x || planePos.x+radius < mins.x){
+		onCollision();
+	}
+	if(planePos.y-radius > maxes.y || planePos.y+radius < mins.y){
+		onCollision();
+	}
+	if(planePos.z-radius > maxes.z || planePos.z+radius < mins.z){
+		onCollision();
+	}
+
+	//terrain
+	if(y-radius < h){
+		onCollision();
+	}
+
+	//rendered objects to check
+	for(int i=0; i<toCheck.size(); i++){
+		//get point
+		currentPos = toCheck[i].getPos();
+		//calculate xyz bounds
+		minMax = toCheck[i].objFile.minMax;
+		objRange = minMax["max"]-minMax["min"];
+		//scale
+		objRange = objRange * toCheck[i].scale;
+		//account for rotation by making square from max
+		objRange.x = fmax(objRange.x, objRange.z);
+		objRange.z = fmax(objRange.x, objRange.z);
+		//half
+		objRange = objRange/2.0f;
+
+		//x check
+		if(planePos.x+radius >= currentPos.x-objRange.x && planePos.x-radius <= currentPos.x+objRange.x){
+			//z check
+			if(planePos.z+radius >= currentPos.z-objRange.z && planePos.z-radius <= currentPos.z+objRange.z){
+				//y check
+				//all objs seem to have y pos as bottom not centre so we take that into account
+				if(planePos.y+radius >= currentPos.y && planePos.y-radius <= currentPos.y+(2.0f*objRange.y)){
+					onCollision();
+				}
+			}
+		}
+	}
+
+
+	//std::cout << planePos.x << std::endl;
+	//std::cout << currentPos.x << std::endl;
+
+}
+
 void renderSkyBox(){
 	
 	glDepthMask(GL_FALSE);
@@ -448,6 +569,9 @@ void renderSkyBox(){
 }
 
 void render( double dt ){
+
+	//clear check vector
+	toCheck.clear();
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setProjection();
@@ -459,19 +583,25 @@ void render( double dt ){
 	
 	
 	drawObject(cottage,-1);
+	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
+	toCheck.push_back(*rock);
 	drawObject(lampPost,-1);
+	toCheck.push_back(*lampPost);
 	
 	tree->pos.x = -0.5;
 	tree->pos.z = -1.0;
 	
 	drawObject(tree,-1);
+	toCheck.push_back(*tree);
 	
 	tree->pos.x = -1.0;
 	tree->pos.z = -1.5;
 	
 	drawObject(tree,-1);
+	toCheck.push_back(*tree);
 	drawObject(plane,dt);
+	handleCollision();
 	
 	
 	glFlush();
