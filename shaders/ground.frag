@@ -142,6 +142,7 @@ vec3 proceduralTex(float scale, int t){
 void main(void){
 	vec4 colour;
 	vec3 base = vec3(1, 1, 1);
+	vec3 rangeVert = normalize(vertex);
 	float r, p;
 
 	vec3 grass = vec3(0.05, 0.2, 0.05);
@@ -159,7 +160,7 @@ void main(void){
 	mountain = 0.4*vec3(mountain.x, (mountain.y - 0.4*proceduralTex(6.0, 1).y), (mountain.z - 0.7*proceduralTex(6.0, 1).z));
 
 	//set base range
-	if(vertex.y > 0.6){
+	if(rangeVert.y > 0.6){
 		base = mountain;
 	}
 	else{
@@ -170,25 +171,25 @@ void main(void){
 
 
 	//green top fade
-	if(vertex.y > 0.6 && vertex.y < 0.7){
-		r = vertex.y - 0.6;
+	if(rangeVert.y > 0.6 && rangeVert.y < 0.7){
+		r = rangeVert.y - 0.6;
 		p = r*10;
 		colour = vec4(base*p, 1.0f) + vec4(grass*(1-p), 1.0f);
 	}
 	//green solid
-	if(vertex.y > 0.4 && vertex.y < 0.6){
+	if(rangeVert.y > 0.4 && rangeVert.y < 0.6){
 		colour = vec4(grass, 1.0f);
 	}
 	//green bottom fade
-	if(vertex.y > 0.3 && vertex.y < 0.4){
-		r = vertex.y - 0.3;
+	if(rangeVert.y > 0.3 && rangeVert.y < 0.4){
+		r = rangeVert.y - 0.3;
 		p = r*10;
 		colour = vec4(base*(1-p), 1.0f) + vec4(grass*p, 1.0f);
 	}
 
 	//snow
-	if(vertex.y > 0.75){
-		r = vertex.y - 0.75;
+	if(rangeVert.y > 0.75){
+		r = rangeVert.y - 0.75;
 		p = r*10;
 		colour = colour + vec4(snow*p, 1.0f);
 	}
