@@ -8,25 +8,25 @@ uniform mat4 projection;
 out vec4 fragColour;
 
 in VertexData {
-    vec4 mColor;
+    vec4 mcolor;
     vec4 mvertex;
 } vertexin;
 
-float getFogFactor(float d) {
+float fog_factor(float d) {
     float fog_max = 20.0;
     float fog_min = 10.0;
 
     if (d >= fog_max) return 1;
     if (d <= fog_min) return 0;
 
-    return 1 - (fog_max - d) / (fog_max - fog_min);
+    return 1-(fog_max-d)/(fog_max-fog_min);
 }
 
 void main(void)
 {
-    vec4 V = vertexin.mvertex;
-    float d = distance(camera, V);
-    float alpha = getFogFactor(d);
+    vec4 vertexin_mvertex = vertexin.mvertex;
+    float dist = distance(camera, vertexin_mvertex);
+    float alpha = fog_factor(dist);
 
-    fragColour = mix(vertexin.mColor, fogColor, alpha);
+    fragColour = mix(vertexin.mcolor, fogColor, alpha);
 }

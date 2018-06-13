@@ -650,6 +650,9 @@ void renderSkyBox(){
 void renderFog() {
 	int programId = programIdMap["fog"];
 	glUseProgram(programId);
+	
+	GLint fogHandle = glGetUniformLocation(programId, "vertex");
+	glUniform1i(fogHandle,0);
 
 	GLfloat fogColor[4] = {0.0, 0.0, 0.0, 1.0};
 
