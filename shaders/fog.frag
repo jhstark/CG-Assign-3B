@@ -1,3 +1,4 @@
+//Author: Alex Waters
 #version 330
 
 uniform vec4 camera;

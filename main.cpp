@@ -646,7 +646,7 @@ void renderSkyBox(){
 
 }
 
-//Author:
+//Author: Alex Waters
 void renderFog() {
 	int programId = programIdMap["fog"];
 	glUseProgram(programId);
