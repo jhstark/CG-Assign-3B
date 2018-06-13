@@ -4,6 +4,8 @@ uniform vec4 camera;
 uniform vec4 fogColor;
 uniform mat4 projection;
 
+out vec4 fragColour;
+
 in VertexData {
     vec4 mColor;
     vec4 mvertex;
@@ -25,5 +27,5 @@ void main(void)
     float d = distance(camera, V);
     float alpha = getFogFactor(d);
 
-    gl_FragColor = mix(vertexin.mColor, fogColor, alpha);
+    fragColour = mix(vertexin.mColor, fogColor, alpha);
 }
