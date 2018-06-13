@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #ifndef _CAMERA_HPP
 #define _CAMERA_HPP
 

@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #ifndef _OBJECT_HPP
 #define _OBJECT_HPP
 

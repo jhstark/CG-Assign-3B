@@ -1,3 +1,5 @@
+// Jordan Hoskin-Stark
+// Replaced by HeightMap
 #include "Landscape.hpp"
 
 #include <vector>

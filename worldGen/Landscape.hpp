@@ -1,3 +1,5 @@
+// Jordan Hoskin-Stark
+// Replaced by HeightMap
 #ifndef _LANDSCAPE_HPP
 #define _LANDSCAPE_HPP
 

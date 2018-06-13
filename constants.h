@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #ifndef __constantsH__
 #define __constantsH__
 

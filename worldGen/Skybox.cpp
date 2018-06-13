@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #include "Skybox.hpp"
 
 #include <vector>

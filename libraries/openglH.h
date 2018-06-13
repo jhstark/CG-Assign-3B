@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #ifndef __openglH__
 #define __openglH__
 

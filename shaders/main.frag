@@ -1,3 +1,4 @@
+// Jordan Hoskin-Stark
 #version 330
 in vec4 vertex;
 in vec3 normal;

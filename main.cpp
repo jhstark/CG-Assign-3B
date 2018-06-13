@@ -71,7 +71,7 @@ void loadShaders(){
 	}
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 int loadVao(Object * object){
 
 	// Store each shape on the VAO buffer
@@ -127,7 +127,7 @@ int loadVao(Object * object){
 
        ** ** ** ** ** **      */
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void setProjection(){
 
     glm::mat4 projection;
@@ -352,7 +352,7 @@ void renderWater(){
 	
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::string, GLuint> textures){
 
 	std::string diffTex = mat->diffuse_texname;
@@ -400,7 +400,7 @@ void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::st
 	glActiveTexture( GL_TEXTURE0 );
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 int setupRender(Object * obj , int programId,std::vector< Object::objShape > Shapes , double dt){
 	int vertexCount = 0;
 	for (int i=0;i<Shapes.size();i++){
@@ -464,7 +464,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 	return vertexCount;
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void drawObject(Object * obj , double dt){
 
 	int programId = programIdMap["main"];
@@ -612,7 +612,7 @@ void handleCollision(){
 
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void renderSkyBox(){
 
 	glDepthMask(GL_FALSE);
@@ -709,12 +709,12 @@ void render( double dt ){
 
        ** ** ** ** ** **      */
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void error_callback(int error, const char* description){
     std::cerr << description;
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark
 void reshape_callback(GLFWwindow *window, int x, int y){
 
     winX = x;
@@ -732,7 +732,7 @@ void reshape_callback(GLFWwindow *window, int x, int y){
 
 }
 
-//Author:
+//Author: Jordan Hoskin-Stark & Alex Waters
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
 
 	GLint polygonMode;
@@ -790,14 +790,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_C:
 				camera->switchCam();
 				break;
-			case GLFW_KEY_B:
-				if ( polygonMode == GL_LINE ) {
-					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-				}
-				else {
-					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				}
-				break;
         }
     }
 	if (action == GLFW_RELEASE) {
@@ -813,18 +805,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				break;
 			case GLFW_KEY_RIGHT:
 				keyPress["right"] = false;
-				break;
-			case GLFW_KEY_W:
-				keyPress["w"] = false;
-				break;
-			case GLFW_KEY_A:
-				keyPress["a"] = false;
-				break;
-			case GLFW_KEY_S:
-				keyPress["s"] = false;
-				break;
-			case GLFW_KEY_D:
-				keyPress["d"] = false;
 				break;
 		}
 	}
