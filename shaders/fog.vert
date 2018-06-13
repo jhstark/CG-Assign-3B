@@ -1,3 +1,4 @@
+//Author: Alex Waters
 #version 330
 
 uniform mat4 projection;
