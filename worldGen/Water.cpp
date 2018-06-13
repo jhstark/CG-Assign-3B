@@ -1,3 +1,5 @@
+/*Author: Brittany Reid*/
+
 #include "Water.hpp"
 
 #include <vector>
@@ -158,7 +160,5 @@ void Water::generate(float size){
 	water.triangleCount = Vertices.size() / 9;
 	
 	data["none"].push_back(water);
-
-
 
 }

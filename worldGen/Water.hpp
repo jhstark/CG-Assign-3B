@@ -1,3 +1,5 @@
+/*Author: Brittany Reid*/
+
 #ifndef _WATER_HPP
 #define _WATER_HPP
 

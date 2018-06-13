@@ -1,3 +1,5 @@
+/*Author: Brittany Reid*/
+
 #include "HeightMap.hpp"
 
 #include "../libraries/stb_image.h"

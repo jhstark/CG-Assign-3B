@@ -1,5 +1,7 @@
 #version 330
 
+//Author: Brittany Reid
+
 //uniform int colourMode;
 in vec3 fragCol;
 in vec3 normal;

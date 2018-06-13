@@ -50,6 +50,7 @@ std::map< std::string , bool > keyPress;
 
        ** ** ** ** ** **      */
 
+//Author: Jordan Hoskin-Stark and Brittany Reid
 void loadShaders(){
 	// Load shader and vertex data
 
@@ -70,6 +71,7 @@ void loadShaders(){
 	}
 }
 
+//Author:
 int loadVao(Object * object){
 
 	// Store each shape on the VAO buffer
@@ -125,6 +127,7 @@ int loadVao(Object * object){
 
        ** ** ** ** ** **      */
 
+//Author:
 void setProjection(){
 
     glm::mat4 projection;
@@ -148,6 +151,7 @@ void setProjection(){
 }
 
 //function to set up overhead light
+//Author: Jordan Hoskin-Stark and Brittany Reid
 void renderOverheadLight(int programId){
 	// Overhead light source
 	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
@@ -187,6 +191,7 @@ void renderOverheadLight(int programId){
 }
 
 //function to set up material values, where material is an optional argument
+//Author: Brittany Reid and Jordan Hoskin-Stark
 void setupMaterials(int programId, float shine, glm::vec3 spec, tinyobj::material_t* material = NULL){
 
 	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
@@ -242,6 +247,7 @@ void setupMaterials(int programId, float shine, glm::vec3 spec, tinyobj::materia
 	}
 }
 
+//Author: Jordan Hoskin-Stark and Brittany Reid
 void renderGround(){
 
 	int programId = programIdMap["ground"];
@@ -294,6 +300,7 @@ void renderGround(){
 
 }
 
+//Author: Brittany Reid
 void renderWater(){
 	int programId = programIdMap["water"];
 
@@ -345,6 +352,7 @@ void renderWater(){
 	
 }
 
+//Author:
 void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::string, GLuint> textures){
 
 	std::string diffTex = mat->diffuse_texname;
@@ -392,6 +400,7 @@ void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::st
 	glActiveTexture( GL_TEXTURE0 );
 }
 
+//Author:
 int setupRender(Object * obj , int programId,std::vector< Object::objShape > Shapes , double dt){
 	int vertexCount = 0;
 	for (int i=0;i<Shapes.size();i++){
@@ -455,6 +464,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 	return vertexCount;
 }
 
+//Author:
 void drawObject(Object * obj , double dt){
 
 	int programId = programIdMap["main"];
@@ -485,6 +495,7 @@ void drawObject(Object * obj , double dt){
 }
 
 //function to preform collision action of stop and reset plane
+//Author: Brittany Reid
 void onCollision(){
 	plane->updateVelocity(0.0);
 	//wait, representing the crash. could replace this with an animation/fire/smoke or other indicator of crashing
@@ -494,6 +505,7 @@ void onCollision(){
 
 //function to handle collision, simple 1 point check
 //if you change pos and scale of ground this will probably break
+//Author: Brittany Reid
 void handleCollision(){
 	glm::vec3 planePos = plane->getPos();
 	glm::vec3 groundPos = ground->getPos();
@@ -600,6 +612,7 @@ void handleCollision(){
 
 }
 
+//Author:
 void renderSkyBox(){
 
 	glDepthMask(GL_FALSE);
@@ -628,6 +641,7 @@ void renderSkyBox(){
 
 }
 
+//Author:
 void renderFog() {
 	int programId = programIdMap["fog"];
 	glUseProgram(programId);
@@ -647,6 +661,7 @@ void renderFog() {
     glShadeModel(GL_FLAT);
 }
 
+//Author: Jordan Hoskin-Stark and Brittany Reid
 void render( double dt ){
 
 	//clear check vector
@@ -694,10 +709,12 @@ void render( double dt ){
 
        ** ** ** ** ** **      */
 
+//Author:
 void error_callback(int error, const char* description){
     std::cerr << description;
 }
 
+//Author:
 void reshape_callback(GLFWwindow *window, int x, int y){
 
     winX = x;
@@ -715,6 +732,7 @@ void reshape_callback(GLFWwindow *window, int x, int y){
 
 }
 
+//Author:
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
 
 	GLint polygonMode;
@@ -813,6 +831,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 }
 
+//Author: Jordan Hoskin-Stark and Brittany Reid
 int main(int argc, char** argv){
 
 // Get OpenGL running

@@ -1,3 +1,5 @@
+/*Author: Brittany Reid*/
+
 #ifndef _HEIGHTMAP_HPP
 #define _HEIGHTMAP_HPP
 
