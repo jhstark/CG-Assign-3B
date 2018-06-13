@@ -130,13 +130,7 @@ void setProjection(){
     glm::mat4 projection;
 
     // glm::perspective(fovy, aspect, near, far)
-<<<<<<< HEAD
-    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0);
-
-=======
     projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 99999.0); 
-	
->>>>>>> Water
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 	//for (int i=0;i<programIdArr.size();i++){
 
@@ -170,21 +164,12 @@ void renderOverheadLight(int programId){
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 
 	// Send the overhead light properties
-<<<<<<< HEAD
-	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 0.0f };
-	glUniform4fv(overheadHandle, 1, overheadLightDir);
-
-
-	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
-
-=======
 	float overheadLightDir[4] = { 0.0, 20.0, 0.0, 0.0f };
 	glUniform4fv(overheadHandle, 1, overheadLightDir); 
 	
 	
 	glm::vec3 sunRGB = glm::vec3(0.94 , 0.94 , 0.8);
 	
->>>>>>> Water
 	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
 	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
 	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
@@ -430,13 +415,9 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		}
 
 		glm::vec3 pos = obj->getPos();
-<<<<<<< HEAD
-
-		setupMaterials(programId, material);
-=======
 		
 		setupMaterials(programId, 0.0f, glm::vec3(0.0), material);
->>>>>>> Water
+		
 		renderOverheadLight(programId);
 
 
@@ -673,14 +654,8 @@ void render( double dt ){
 	camera->update(plane->getPos(),plane->direction);
 	renderSkyBox();
 	renderGround();
-<<<<<<< HEAD
-
-
-=======
 	renderWater();
 	
-	
->>>>>>> Water
 	drawObject(cottage,-1);
 	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
@@ -882,13 +857,9 @@ int main(int argc, char** argv){
 	loadVao(ground);
 	loadVao(water);
 	// ground->printVertices();
-<<<<<<< HEAD
-
-	 plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
-=======
 	
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
->>>>>>> Water
+	
 	//plane->loadFile("models/btest/Barrel02.obj");
 	loadVao(plane);
 
