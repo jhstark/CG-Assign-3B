@@ -26,12 +26,12 @@ class Skybox:public Object{
 			"front.jpg",
 			"back.jpg" */
 		std::vector<std::string> faces{
-			"models/skybox/right.jpg",
-			"models/skybox/left.jpg",
-			"models/skybox/top.jpg",
-			"models/skybox/bottom.jpg",
-			"models/skybox/front.jpg",
-			"models/skybox/back.jpg",
+			"models/skybox/right.tga",
+			"models/skybox/left.tga",
+			"models/skybox/top.tga",
+			"models/skybox/bottom.tga",
+			"models/skybox/front.tga",
+			"models/skybox/back.tga",
 		};
 		
 };
