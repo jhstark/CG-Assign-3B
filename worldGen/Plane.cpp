@@ -23,9 +23,7 @@ void Plane::resetPos(double dt){
 	
 	rpy = glm::vec3( 0.0 , 0.0 , DEG2RAD(180) );	// Roll pitch yaw (radians)
 	pos = glm::vec3(0.0);	// x y z position
-	posMat = glm::mat4();
 	pos.y = 1.0;
-	posMat[3][2] = h;
 	
 	lastUpdate = dt;
 	
@@ -47,7 +45,7 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 		vTemp = 1;
 	}
 	
-	float rotSpeed  = 2.0 / vTemp;
+	float rotSpeed  = 5.0 / vTemp;
 	
 	// Change yaw on left and right arrows
 	if (keyPress["left"] == true){
@@ -88,62 +86,5 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	pos.z += (v * cos(rpy.z))/250;	
 	pos.y -= (v * tan_y)/250;
 	
-	direction = rpy;
-	
-	
-	//std::cout <<sin(rpy.x)<<","<<sin(rpy.y)<<","<<sin(rpy.z)<<std::endl;
-	updatePosMat(zRot,xRot);
-	
 	lastUpdate = timeOffset;
-}
-
-void Plane::updatePosMat(bool zRot, bool yRot){
-	
-	glm::vec3 posX( posMat[0][0], posMat[1][0], posMat[2][0] );
-	glm::vec3 posY( posMat[0][1], posMat[1][1], posMat[2][1] );
-	glm::vec3 posZ( posMat[0][2], posMat[1][2], posMat[2][2] );
-
-	float speed = 3.0;
-	
-	//Rotate around the models z axis (roll)
-	if (zRot){
-		
-		float cosZ = cos(abs(speed*rpy.z - lastRpy.z));
-		float sinZ = sin(abs(speed*rpy.z - lastRpy.z));
-		glm::vec3 tmpX = posX;
-		
-		posX = glm::vec3(cosZ * posMat[0][0] , -sinZ*posMat[1][0] , posMat[2][0]);
-		posY = glm::vec3(sinZ * posMat[0][1] , cosZ * posMat[1][1] , posMat[2][1]);
-		
-	}
-
-	// Update the model matrix with new eye axes.
-	posMat[0][0] = posX[0];
-	posMat[1][0] = posX[1];
-	posMat[2][0] = posX[2];
-	
-	posMat[0][1] = posY[0];
-	posMat[1][1] = posY[1];
-	posMat[2][1] = posY[2];
-	
-	posMat[0][2] = posZ[0];
-	posMat[1][2] = posZ[1];
-	posMat[2][2] = posZ[2];
-	
-/* 	std::cout << " --------------------- " << std::endl;
-	
-	for (int i=0;i<4;i++){
-		std::cout << "(";
-		for (int j=0;j<4;j++){
-			std::cout << posMat[i][j] << ",";
-		}
-		std::cout << ")" << std::endl;
-	}
-	
-	std::cout << " --------------------- " << std::endl; */
-	
-}
-
-glm::mat4 Plane::getModelMat(){
-	return posMat;
 }

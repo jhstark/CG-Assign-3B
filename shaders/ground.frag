@@ -14,6 +14,7 @@ uniform bool enableTexMapSpec;
 
 uniform vec4 overheadlight_dir;
 uniform vec4 yellowlight_pos;
+uniform vec3 camPos;
 
 uniform int lightingMode;
 
@@ -212,6 +213,7 @@ void main(void){
 	vec4 diffuse = getDiffuse(colour);
 	vec4 ambient = getAmbient(mtl_ambient);
 	vec4 specular = getSpec(mtl_specular);
-
+	
+	//fragColour += 0.5*lampLight(vec4(vertex,1.0), normalize(normal));
 	fragColour = ambient + diffuse + specular;
 }

@@ -43,17 +43,20 @@ void Camera::followPlane(glm::vec3 pos){
 	glm::vec3 at(pos.x, pos.y, pos.z);
 	eye.y = pos.y + 1.0;
 	eye.z = pos.z + 2.0;
+	camPos = initEye;
 	viewMtx = glm::lookAt(initEye, at, up);
 	
 }
 
-void Camera::update(glm::vec3 pos,glm::vec3 dir){
+void Camera::update(float scale , glm::vec3 pos,glm::vec3 dir){
 	if (type == "fixed"){
 		lookAt(pos);
 	}
 	else{
-		glm::vec3 at(pos.x, pos.y, pos.z);
-		glm::vec3 from(pos.x - 3 * sin(dir.z), pos.y + std::min(tan(dir.y), 10.0f), pos.z - 3 * cos(dir.z));
+		float scaleFact = 50 * scale;
+		glm::vec3 at(pos.x, pos.y, pos.z);//+ std::min(tan(dir.y), scaleFact)
+		glm::vec3 from(pos.x - scaleFact * sin(dir.z), (pos.y + scaleFact/3) , pos.z - scaleFact * cos(dir.z));
+		camPos = from;
 		viewMtx = glm::lookAt(from, at, up);
 	}
 	//viewMtx = glm::lookAt(eye, at, up);

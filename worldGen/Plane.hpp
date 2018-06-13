@@ -23,8 +23,6 @@ class Plane:public Object{
 		float h;			// height units
 		glm::vec3 lastRpy = glm::vec3(0.0); // Roll pitch yaw (radians)
 		glm::vec3 lastPos = glm::vec3(0.0);
-		glm::mat4 posMat;
-		void updatePosMat(bool, bool);
 		double lastUpdate;
 		// Functions
 		

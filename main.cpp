@@ -33,10 +33,10 @@ Skybox *skybox = new Skybox(1.0);
 HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
 Water *water = new Water(100.0f, 1.0f);
 
-Plane *plane = new Plane(0.05);
+Plane *plane = new Plane(0.005);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
-Object *cottage = new Object( 0.05 , glm::vec3(0.0 , 0.0 , 0.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-120)) );
-Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -3.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
+Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , -3.0) , glm::vec3(0.0) );
 Object *tree = new Object( 0.1 , glm::vec3(-0.5 , 0.0 , -1.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
 
 //objects to be checked for collision
@@ -154,12 +154,21 @@ void renderOverheadLight(int programId){
 	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
 	int overheadDiffHandle = glGetUniformLocation(programId, "overheadlight_diffuse");
 	int overheadSpecHandle = glGetUniformLocation(programId, "overheadlight_specular");
+	
+	int camPosHandle = glGetUniformLocation(programId, "camPos");
+	int lampPosHandle = glGetUniformLocation(programId, "lampPos");
 
 	/*
 	if (overheadHandle == -1 || overheadAmbHandle == -1 || overheadDiffHandle == -1 || overheadSpecHandle == -1){
 		std::cout << "Can't find uniforms for overhead light" << std::endl;
 		exit(1);
 	} */
+	
+	glm::vec3 viewPos = camera->camPos;
+	glUniform3f(camPosHandle,viewPos.x , viewPos.y , viewPos.z);
+	
+	glm::vec3 lampPostPos = lampPost->pos;
+	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+1*lampPost->scale , lampPostPos.z);
 
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 
@@ -173,6 +182,7 @@ void renderOverheadLight(int programId){
 	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
 	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
 	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
+	
 }
 
 //function to set up material values, where material is an optional argument
@@ -332,12 +342,6 @@ void renderWater(){
 	}
 	glBindVertexArray(0);
 	
-}
-
-
-void renderAircraftLight(){
-	glm::vec3 direction = glm::vec3( 0.0, -1.0, 0.0 ); //Straight down until there is a vector that represents the aircraft orientation
-
 }
 
 void activateTextures(int programId , tinyobj::material_t* mat, std::map<std::string, GLuint> textures){
@@ -651,7 +655,7 @@ void render( double dt ){
 	setProjection();
 
 
-	camera->update(plane->getPos(),plane->direction);
+	camera->update(plane->scale,plane->getPos(),plane->rpy);
 	renderSkyBox();
 	renderGround();
 	renderWater();
