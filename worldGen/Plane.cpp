@@ -60,9 +60,11 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	if (keyPress["right"] == false && keyPress["left"] == false){
 		if (rpy.x > 0.0){
 			rpy.x = std::max(rpy.x - 0.1,0.0) ;
+			rpy.z = rpy.z - rotSpeed * dt;
 		}
 		else if (rpy.x < 0.0){
 			rpy.x = std::min(rpy.x + 0.1,0.0) ;
+			rpy.z = rpy.z + rotSpeed * dt;
 		}
 	}
 	
