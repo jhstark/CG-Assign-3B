@@ -150,7 +150,7 @@ void Object::findMinMax(){
 }
 
 void Object::loadFile( std::string input ){
-	std::cout << input << std::endl;
+	//std::cout << input << std::endl;
 	std::string err;
 	
 	// Thanks to https://github.com/syoyo/tinyobjloader/blob/master/examples/viewer/viewer.cc
@@ -225,8 +225,8 @@ void Object::loadTexGPU(std::string texName){
 		GLint v;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &v);
 		
-		std::cout << "Loaded texture: " << texture_filename << ", w = " << w
-		<< ", h = " << h << ", comp = " << comp << ",texID = " << texture_id << ", buffer = " << v <<  std::endl;
+		/* std::cout << "Loaded texture: " << texture_filename << ", w = " << w
+		<< ", h = " << h << ", comp = " << comp << ",texID = " << texture_id << ", buffer = " << v <<  std::endl; */
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
@@ -253,9 +253,9 @@ void Object::loadTexture(){
 	for (size_t i = 0; i < objFile.materials.size(); i++) {
 	
 		tinyobj::material_t* mat = &objFile.materials[i];
-		std::cout<< "diff: " << mat->diffuse_texname << std::endl;
+		/* std::cout<< "diff: " << mat->diffuse_texname << std::endl;
 		std::cout<< "bump: " << mat->bump_texname << std::endl;
-		std::cout<< "spec: " << mat->specular_texname << std::endl;
+		std::cout<< "spec: " << mat->specular_texname << std::endl; */
 		
 		if (mat->diffuse_texname.length() > 0) {
 			loadTexGPU(mat->diffuse_texname);

@@ -69,7 +69,6 @@ void Skybox::loadTexture(){
 	
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-	std::cout << "Bound cube map to " << textureID << std::endl;
 	
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
