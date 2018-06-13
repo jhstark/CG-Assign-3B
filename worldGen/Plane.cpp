@@ -36,7 +36,6 @@ void Plane::updateVelocity(float new_v){
 void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset){
 	
 	double dt = timeOffset - lastUpdate;
-	bool xRot,yRot,zRot = false; 
 	lastRpy = rpy;
 	lastPos = pos;
 	float vTemp = v + abs(1/rpy.x);
@@ -49,13 +48,11 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	
 	// Change yaw on left and right arrows
 	if (keyPress["left"] == true){
-		zRot = true;
 		rpy.z = rpy.z + rotSpeed * dt;
 		rpy.x = std::max(rpy.x - 0.05,-0.8) ;
 	}
 	
 	if (keyPress["right"] == true){
-		zRot = true;
 		rpy.z = rpy.z - rotSpeed * dt;
 		rpy.x = std::min(rpy.x + 0.05,0.8);
 	}
@@ -72,11 +69,9 @@ void Plane::updatePos(std::map< std::string , bool > keyPress, double timeOffset
 	
 	// Change pitch on up and down arrows
 	if (keyPress["up"] == true){
-		xRot = true;
 		rpy.y = std::max(rpy.y - dt, -1.3);
 	}
 	if (keyPress["down"] == true){
-		xRot = true;
 		rpy.y = std::min(rpy.y + dt, 1.3);
 	}
 	

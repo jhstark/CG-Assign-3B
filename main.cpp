@@ -36,8 +36,8 @@ Water *water = new Water(100.0f, 1.0f);
 Plane *plane = new Plane(0.005);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -3.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
-Object *lampPost = new Object( 0.01 , glm::vec3(-0.5 , 0.0 , -3.0) , glm::vec3(0.0) );
-Object *tree = new Object( 0.1 , glm::vec3(-0.5 , 0.0 , -1.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
+Object *lampPost = new Object( 0.02 , glm::vec3(-0.65 , 0.0 , -2.5) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
+Object *tree = new Object( 0.2 , glm::vec3(0.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
 
 //objects to be checked for collision
 std::vector<Object> toCheck;
@@ -130,7 +130,7 @@ void setProjection(){
     glm::mat4 projection;
 
     // glm::perspective(fovy, aspect, near, far)
-    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 99999.0); 
+    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.05, 99999.0); 
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 	//for (int i=0;i<programIdArr.size();i++){
 
@@ -168,6 +168,7 @@ void renderOverheadLight(int programId){
 	glUniform3f(camPosHandle,viewPos.x , viewPos.y , viewPos.z);
 	
 	glm::vec3 lampPostPos = lampPost->pos;
+	std::cout <<lampPostPos.x<<","<<lampPostPos.y<<","<<lampPostPos.z<<std::endl;
 	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+1*lampPost->scale , lampPostPos.z);
 
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
@@ -510,7 +511,7 @@ void handleCollision(){
 
 	//plane radius
 	//currently a single value, represents a square collision box
-	float radius= 0.015f;
+	float radius = 0.006f;
 
 	//get coords as value between 0 and 1
 	x = (planePos.x / scale) - scale*groundPos.x - 1.4;
@@ -667,14 +668,14 @@ void render( double dt ){
 	drawObject(lampPost,-1);
 	toCheck.push_back(*lampPost);
 	
-	tree->pos.x = -0.5;
-	tree->pos.z = -1.0;
+	tree->pos.x = -1.0;
+	tree->pos.z = -3.0;
 
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
 	
 	tree->pos.x = -1.0;
-	tree->pos.z = -1.5;
+	tree->pos.z = -2.5;
 
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
