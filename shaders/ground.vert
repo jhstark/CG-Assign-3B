@@ -22,9 +22,9 @@ void main(void) {
 	
 	fragCol = Kd;
 	
-    normal = normalize(normalMatrix * a_normal);
-	st = mat2(vec2(1.0 , 0.0) , vec2(0.0, -1.0)) * a_texture;
+    normal = normalize(a_normal);
+	st = a_texture;
 
-	vertex = a_vertex;
+	vertex = (modelviewMatrix * vec4(a_vertex, 1.0)).xyz;
 	
 }

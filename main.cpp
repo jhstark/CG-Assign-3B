@@ -168,8 +168,8 @@ void renderOverheadLight(int programId){
 	glUniform3f(camPosHandle,viewPos.x , viewPos.y , viewPos.z);
 	
 	glm::vec3 lampPostPos = lampPost->pos;
-	std::cout <<lampPostPos.x<<","<<lampPostPos.y<<","<<lampPostPos.z<<std::endl;
-	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+1*lampPost->scale , lampPostPos.z);
+	
+	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+1.0 , lampPostPos.z);
 
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 
