@@ -37,7 +37,7 @@ uniform float shininess; // Specular surface colour
 
 vec4 overheadPhongDirLight(in vec4 position, in vec3 norm){
 
-    vec3 lightDir   = normalize(-overheadlight_dir.xyz);
+    vec3 lightDir   = normalize(overheadlight_dir.xyz);
 	vec3 viewDir    = normalize(vec4(0.0, 0.0, 1.0,0) - position).xyz;
 	vec3 halfwayDir = normalize(lightDir + viewDir);
     

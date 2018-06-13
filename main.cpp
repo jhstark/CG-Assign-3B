@@ -20,6 +20,7 @@
 #include "worldGen/Plane.hpp"
 #include "worldGen/Landscape.hpp"
 #include "worldGen/HeightMap.hpp"
+#include "worldGen/Water.hpp"
 
 Camera *camera = new Camera();
 
@@ -30,6 +31,7 @@ Camera *camera = new Camera();
 
 Skybox *skybox = new Skybox(1.0);
 HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
+Water *water = new Water(100.0f, 1.0f);
 
 Plane *plane = new Plane(0.05);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
@@ -56,7 +58,7 @@ void loadShaders(){
 	programIdMap["skybox"] = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
 	programIdMap["ground"] = LoadShaders("shaders/ground.vert", "shaders/ground.frag");
 	programIdMap["fog"] = LoadShaders("shaders/fog.vert", "shaders/fog.frag");
-
+	programIdMap["water"] = LoadShaders("shaders/water.vert", "shaders/water.frag");
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 
@@ -128,8 +130,13 @@ void setProjection(){
     glm::mat4 projection;
 
     // glm::perspective(fovy, aspect, near, far)
+<<<<<<< HEAD
     projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 100.0);
 
+=======
+    projection = glm::perspective(M_PI/3.0, double(winX) / double(winY), 0.2, 99999.0); 
+	
+>>>>>>> Water
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
 	//for (int i=0;i<programIdArr.size();i++){
 
@@ -163,19 +170,28 @@ void renderOverheadLight(int programId){
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 
 	// Send the overhead light properties
+<<<<<<< HEAD
 	float overheadLightDir[4] = { 0.0, -1.0, 0.0, 0.0f };
 	glUniform4fv(overheadHandle, 1, overheadLightDir);
 
 
 	glm::vec3 sunRGB = glm::vec3(1.0 , 1.0 , 0.98);
 
+=======
+	float overheadLightDir[4] = { 0.0, 20.0, 0.0, 0.0f };
+	glUniform4fv(overheadHandle, 1, overheadLightDir); 
+	
+	
+	glm::vec3 sunRGB = glm::vec3(0.94 , 0.94 , 0.8);
+	
+>>>>>>> Water
 	glUniform4f(overheadAmbHandle,ambient.x,ambient.y,ambient.z,1.0);
 	glUniform4f(overheadDiffHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
 	glUniform4f(overheadSpecHandle,sunRGB.x,sunRGB.y,sunRGB.z,1.0);
 }
 
 //function to set up material values, where material is an optional argument
-void setupMaterials(int programId, tinyobj::material_t* material = NULL){
+void setupMaterials(int programId, float shine, glm::vec3 spec, tinyobj::material_t* material = NULL){
 
 	int ambientMtlHandle = glGetUniformLocation(programId, "mtl_ambient");
 	int diffuseMtlHandle = glGetUniformLocation(programId, "mtl_diffuse");
@@ -211,21 +227,21 @@ void setupMaterials(int programId, tinyobj::material_t* material = NULL){
 	}
 	//otherwise, set default material values
 	else{
-		glUniform1f(shininessHandle,0.0f);
+		glUniform1f(shininessHandle,shine);
 		glUniform4f(ambientMtlHandle,
-				0.5,
-				0.5,
-				0.5,
+				0.1,
+				0.1,
+				0.1,
 				1.0);
 		glUniform4f(diffuseMtlHandle,
 				0.6,
 				0.6,
 				0.6,
 				1.0);
-		glUniform4f(specularMtlHandle,
-				0.7,
-				0.7,
-				0.7,
+		glUniform4f(specularMtlHandle, 
+				spec.x,
+				spec.y,
+				spec.z,
 				1.0);
 	}
 }
@@ -260,7 +276,7 @@ void renderGround(){
 			glm::vec3 pos = ground->getPos();
 
 			//set up materials
-			setupMaterials(programId);
+			setupMaterials(programId, 0.1f, glm::vec3(0.1, 0.1, 0.1));
 			//overheadlight
 			renderOverheadLight(programId);
 
@@ -280,6 +296,57 @@ void renderGround(){
 	}
 	glBindVertexArray(0);
 
+}
+
+void renderWater(){
+	int programId = programIdMap["water"];
+
+	for (std::map<std::string,std::vector< Object::objShape > >::iterator item=water->data.begin(); item!=water->data.end(); ++item){
+		
+		std::vector< Object::objShape > Shapes = item->second;
+		
+		for (int i=0;i<Shapes.size();i++){
+			
+			unsigned int vaoHandle = Shapes.at(i).vaoHandle;
+			glUseProgram( programId );
+			glBindVertexArray(vaoHandle);
+			
+			// Assign the view matrix
+			int viewHandle = glGetUniformLocation(programId, "viewMatrix");
+			glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
+			
+			// Assign the model view matrix
+			int mvHandle = glGetUniformLocation(programId, "modelviewMatrix");
+			int normHandle = glGetUniformLocation(programId, "normalMatrix");
+			
+			glm::mat4 mvMatrix;
+			glm::mat3 normMatrix;
+			
+			//scale and translate
+			// Set pos using ground->pos = glm::vec3( x , y , z)
+			glm::vec3 pos = water->getPos();
+
+			//set up materials
+			setupMaterials(programId, 200.0f, glm::vec3(0.5, 0.5, 0.5));
+			//overheadlight
+			renderOverheadLight(programId);
+
+			mvMatrix = glm::scale(mvMatrix, glm::vec3(water->scale)); 
+			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
+
+			glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
+			
+			// Calculate the normal transformation based on the current view and the model view
+			normMatrix = glm::transpose(glm::inverse(glm::mat3(mvMatrix * camera->getView())));
+			glUniformMatrix3fv(normHandle, 1, false, glm::value_ptr(normMatrix));
+				
+			int vertexCount = 3 * ( Shapes.at(i).triangleCount );
+			glDrawArrays(GL_TRIANGLES,0,vertexCount);
+			
+		}
+	}
+	glBindVertexArray(0);
+	
 }
 
 
@@ -363,8 +430,13 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		}
 
 		glm::vec3 pos = obj->getPos();
+<<<<<<< HEAD
 
 		setupMaterials(programId, material);
+=======
+		
+		setupMaterials(programId, 0.0f, glm::vec3(0.0), material);
+>>>>>>> Water
 		renderOverheadLight(programId);
 
 
@@ -601,8 +673,14 @@ void render( double dt ){
 	camera->update(plane->getPos(),plane->direction);
 	renderSkyBox();
 	renderGround();
+<<<<<<< HEAD
 
 
+=======
+	renderWater();
+	
+	
+>>>>>>> Water
 	drawObject(cottage,-1);
 	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
@@ -802,9 +880,15 @@ int main(int argc, char** argv){
 	loadVao(skybox);
 	skybox->loadTexture();
 	loadVao(ground);
+	loadVao(water);
 	// ground->printVertices();
+<<<<<<< HEAD
 
 	 plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
+=======
+	
+	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
+>>>>>>> Water
 	//plane->loadFile("models/btest/Barrel02.obj");
 	loadVao(plane);
 

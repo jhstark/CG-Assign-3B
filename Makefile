@@ -25,11 +25,10 @@ endif
 
 CC = g++ --std=c++11
 EXE = assign3_part2
-OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Plane.o HeightMap.o
+OBJS = main.o stb_image.o tiny_obj_loader.o Camera.o shader.o Object.o Skybox.o Plane.o HeightMap.o Water.o
 libDir = libraries/
 
 .PHONY:  clean
-test: ; $(info $$var is [$(PLATFORM)])echo Hello world
 all: $(EXE)
 
 $(EXE): $(OBJS)
@@ -64,6 +63,11 @@ Plane.o : worldGen/Plane.cpp worldGen/Plane.hpp
 
 HeightMap.o : worldGen/HeightMap.cpp worldGen/HeightMap.hpp
 	$(CC) $(CPPFLAGS) -c worldGen/HeightMap.cpp
+
+Water.o : worldGen/Water.cpp worldGen/Water.hpp
+	$(CC) $(CPPFLAGS) -c worldGen/Water.cpp
 	
 clean:
 	rm -f *.o run$(EXT)
+
+test: ; $(info $$var is [$(PLATFORM)])echo Hello world
