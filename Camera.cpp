@@ -5,7 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Camera::Camera(){
-	initEye = glm::vec3(0.0f , 0.1f , -2.5f);
+	initEye = glm::vec3(0.0f , 0.1f , -2.0f);
 	at = glm::vec3(0.0f, 0.0f, 0.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	reset();

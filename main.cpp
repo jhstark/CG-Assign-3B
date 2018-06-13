@@ -35,8 +35,8 @@ Water *water = new Water(100.0f, 1.0f);
 
 Plane *plane = new Plane(0.005);
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , -0.1 , 0.0) , glm::vec3(0.0) );
-Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -3.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
-Object *lampPost = new Object( 0.02 , glm::vec3(-0.65 , 0.0 , -2.5) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
+Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -2.5) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
+Object *lampPost = new Object( 0.02 , glm::vec3(-0.65 , 0.0 , -2.2) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
 Object *tree = new Object( 0.2 , glm::vec3(0.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );
 
 //objects to be checked for collision
@@ -409,7 +409,6 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		int matId = Shapes.at(i).matId;
 		tinyobj::material_t* material = &obj->objFile.materials[matId];
 		activateTextures(programId, material , obj->textures );
-
 		unsigned int vaoHandle = Shapes.at(i).vaoHandle;
 		glBindVertexArray(vaoHandle);
 
@@ -447,9 +446,15 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
 		mvMatrix = glm::scale(mvMatrix, glm::vec3(obj->scale));
 
-		mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
-		mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
-		mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
+			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
+			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
+		if (material->diffuse_texname == "propeller_rotation_D.tga"){
+			// PROP
+			mvMatrix = glm::rotate(mvMatrix, 100*(float)dt , glm::vec3(0.0 , 0.0 , 1.0)); // roll
+		}
+		else{
+			mvMatrix = glm::rotate(mvMatrix, rpy.x , glm::vec3(0.0 , 0.0 , 1.0)); // roll
+		}
 
 
 		glUniformMatrix4fv(mvHandle, 1, false, glm::value_ptr(mvMatrix) );
@@ -682,16 +687,31 @@ void render( double dt ){
 	toCheck.push_back(*rock);
 	
 	tree->pos.x = -1.0;
+	tree->pos.y = 0.1;
 	tree->pos.z = -3.0;
+
+	drawObject(tree,-1);
+	toCheck.push_back(*tree);
+	tree->pos.y = 0.0;
+	
+	tree->pos.x = -1.2;
+	tree->pos.z = -2.5;
+
+	drawObject(tree,-1);
+	toCheck.push_back(*tree);
+	
+	tree->pos.x = -1.1;
+	tree->pos.z = -1.8;
 
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
 	
 	tree->pos.x = -1.0;
-	tree->pos.z = -2.5;
+	tree->pos.z = -1.0;
 
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
+	
 	drawObject(plane,dt);
 	drawObject(lampPost,-1);
 	toCheck.push_back(*lampPost);
