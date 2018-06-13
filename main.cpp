@@ -173,7 +173,7 @@ void renderOverheadLight(int programId){
 	
 	glm::vec3 lampPostPos = lampPost->pos;
 	
-	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+1.0 , lampPostPos.z);
+	glUniform3f(lampPosHandle,lampPostPos.x , lampPostPos.y+0.5 , lampPostPos.z);
 
 	glm::vec3 ambient = glm::vec3(0.2); // Sets the ambient light value for all lighting modes
 
@@ -680,8 +680,6 @@ void render( double dt ){
 	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
 	toCheck.push_back(*rock);
-	drawObject(lampPost,-1);
-	toCheck.push_back(*lampPost);
 	
 	tree->pos.x = -1.0;
 	tree->pos.z = -3.0;
@@ -695,6 +693,8 @@ void render( double dt ){
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
 	drawObject(plane,dt);
+	drawObject(lampPost,-1);
+	toCheck.push_back(*lampPost);
 	handleCollision();
 	
 	renderFog();
@@ -829,7 +829,7 @@ int main(int argc, char** argv){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create the window and OpenGL context
-	std::string title = "The title of the window";
+	std::string title = "Excellent model aircraft game";
     GLFWwindow* window = glfwCreateWindow(winX, winY, &title[0], NULL, NULL);
 
     if (!window){

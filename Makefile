@@ -1,3 +1,4 @@
+# Jordan Hoskin-Stark
 PLATFORM := $(shell uname)
 
 # Options provided by pkg-config where possible

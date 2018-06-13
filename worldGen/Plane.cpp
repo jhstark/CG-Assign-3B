@@ -15,7 +15,7 @@
 
 Plane::Plane(float scale) : Object(scale){
 	
-	v = 0.0;
+	v = 1.0;
 	h = 5.0;
 	
 	resetPos(0.0);
@@ -24,7 +24,7 @@ Plane::Plane(float scale) : Object(scale){
 void Plane::resetPos(double dt){
 	
 	rpy = glm::vec3( 0.0 , 0.0 , DEG2RAD(180) );	// Roll pitch yaw (radians)
-	pos = glm::vec3(0.0);	// x y z position
+	pos = glm::vec3(0.0 , 0.0 , 5.0);	// x y z position
 	pos.y = 1.0;
 	
 	lastUpdate = dt;
