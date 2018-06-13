@@ -24,16 +24,16 @@
 
 Camera *camera = new Camera();
 
-
 // Load the objects in as global variables
-// Object(float scale , glm::vec3 pos , glm::vec3 rpy)
-// rpy = roll, pitch, yaw in radians from initial orientation
-
 Skybox *skybox = new Skybox(1.0);
 HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f);
 Water *water = new Water(100.0f, 1.0f);
 
 Plane *plane = new Plane(0.005);
+
+// Object(float scale , glm::vec3 pos , glm::vec3 rpy)
+// rpy = roll, pitch, yaw in radians from initial orientation
+
 Object *rock = new Object( 0.05 , glm::vec3(1.0 , -0.1 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -2.5) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
 Object *lampPost = new Object( 0.02 , glm::vec3(-0.65 , 0.0 , -2.2) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
@@ -42,7 +42,7 @@ Object *tree = new Object( 0.2 , glm::vec3(0.0) , glm::vec3(0.0 , DEG2RAD(-90) ,
 //objects to be checked for collision
 std::vector<Object> toCheck;
 
-
+// Holds the keys that are currently pressed - jordan
 std::map< std::string , bool > keyPress;
 /*     ** ** ** ** ** **
 
@@ -152,7 +152,7 @@ void setProjection(){
 
 //function to set up overhead light
 //Author: Jordan Hoskin-Stark and Brittany Reid
-void renderOverheadLight(int programId){
+void renderLights(int programId){
 	// Overhead light source
 	int overheadHandle = glGetUniformLocation(programId, "overheadlight_dir");
 	int overheadAmbHandle = glGetUniformLocation(programId, "overheadlight_ambient");
@@ -280,7 +280,7 @@ void renderGround(){
 			//set up materials
 			setupMaterials(programId, 0.1f, glm::vec3(0.1, 0.1, 0.1));
 			//overheadlight
-			renderOverheadLight(programId);
+			renderLights(programId);
 
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(ground->scale));
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
@@ -332,7 +332,7 @@ void renderWater(){
 			//set up materials
 			setupMaterials(programId, 200.0f, glm::vec3(0.5, 0.5, 0.5));
 			//overheadlight
-			renderOverheadLight(programId);
+			renderLights(programId);
 
 			mvMatrix = glm::scale(mvMatrix, glm::vec3(water->scale)); 
 			mvMatrix = glm::translate(mvMatrix, glm::vec3(pos.x , pos.y, pos.z));
@@ -431,7 +431,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 		
 		setupMaterials(programId, 0.0f, glm::vec3(0.0), material);
 		
-		renderOverheadLight(programId);
+		renderLights(programId);
 
 
 		glUniformMatrix4fv( viewHandle, 1, false, glm::value_ptr(camera->getView()) );
@@ -449,7 +449,7 @@ int setupRender(Object * obj , int programId,std::vector< Object::objShape > Sha
 			mvMatrix = glm::rotate(mvMatrix, rpy.z , glm::vec3(0.0 , 1.0 , 0.0)); // yaw
 			mvMatrix = glm::rotate(mvMatrix, rpy.y , glm::vec3(1.0 , 0.0 , 0.0)); // pitch
 		if (material->diffuse_texname == "propeller_rotation_D.tga"){
-			// PROP
+			// This is the PROP so rotate it!
 			mvMatrix = glm::rotate(mvMatrix, 100*(float)dt , glm::vec3(0.0 , 0.0 , 1.0)); // roll
 		}
 		else{
@@ -681,11 +681,13 @@ void render( double dt ){
 	renderGround();
 	renderWater();
 	
+	// Draw the cottage and the rock
 	drawObject(cottage,-1);
 	toCheck.push_back(*cottage);
 	drawObject(rock,-1);
 	toCheck.push_back(*rock);
 	
+	// Render all the trees
 	tree->pos.x = -1.0;
 	tree->pos.y = 0.1;
 	tree->pos.z = -3.0;
@@ -712,6 +714,7 @@ void render( double dt ){
 	drawObject(tree,-1);
 	toCheck.push_back(*tree);
 	
+	// Draw the plane
 	drawObject(plane,dt);
 	drawObject(lampPost,-1);
 	toCheck.push_back(*lampPost);
@@ -755,10 +758,8 @@ void reshape_callback(GLFWwindow *window, int x, int y){
 //Author: Jordan Hoskin-Stark & Alex Waters
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
 
-	GLint polygonMode;
-	glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
-
-    // Close the application by pressing Esc
+    // Close the application by pressing Esc - jhstark
+	// Enable the key press for smooth movement when held down - jhstark
     if (action == GLFW_PRESS) {
         switch (key) {
 			case GLFW_KEY_ESCAPE:
@@ -776,6 +777,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				break;
 			case GLFW_KEY_RIGHT:
 				keyPress["right"] = true;
+				break;
+			case GLFW_KEY_C:
+				camera->switchCam();
 				break;
 			case GLFW_KEY_0:
 				plane->updateVelocity(0.0);
@@ -807,11 +811,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_9:
 				plane->updateVelocity(9.0);
 				break;
-			case GLFW_KEY_C:
-				camera->switchCam();
-				break;
         }
     }
+	// Disable the key press on release - jhstark
 	if (action == GLFW_RELEASE) {
         switch (key) {
 			case GLFW_KEY_UP:
@@ -849,7 +851,7 @@ int main(int argc, char** argv){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create the window and OpenGL context
-	std::string title = "Excellent model aircraft game";
+	std::string title = "Excellent Model Aircraft Game";
     GLFWwindow* window = glfwCreateWindow(winX, winY, &title[0], NULL, NULL);
 
     if (!window){
@@ -880,11 +882,8 @@ int main(int argc, char** argv){
 	skybox->loadTexture();
 	loadVao(ground);
 	loadVao(water);
-	// ground->printVertices();
 	
 	plane->loadFile("models/A6M_ZERO/A6M_ZERO.obj");
-	
-	//plane->loadFile("models/btest/Barrel02.obj");
 	loadVao(plane);
 
 	rock->loadFile("models/rock/rock_v2.obj");
@@ -903,8 +902,8 @@ int main(int argc, char** argv){
 // Initialise callbacks
 	glfwSetKeyCallback(window, key_callback);
     glfwSetFramebufferSizeCallback(window, reshape_callback);
+	
 // Main rendering loop
-
     double start = glfwGetTime();
     double now;
 

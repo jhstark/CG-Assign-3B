@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 #include "Object.hpp"
 #include <iostream>
 #include <vector>

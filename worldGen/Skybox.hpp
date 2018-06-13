@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 #ifndef _SKYBOX_HPP
 #define _SKYBOX_HPP
 

@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 // Replaced by HeightMap
 #include "Landscape.hpp"
 

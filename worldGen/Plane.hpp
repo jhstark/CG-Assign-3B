@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 #ifndef _PLANE_HPP
 #define _PLANE_HPP
 

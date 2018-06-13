@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 #version 330
 out vec4 fragColour;
 

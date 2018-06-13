@@ -1,4 +1,4 @@
-// Jordan Hoskin-Stark
+// Author: Jordan Hoskin-Stark
 #ifndef _OBJECT_HPP
 #define _OBJECT_HPP
 
