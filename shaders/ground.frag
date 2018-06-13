@@ -37,7 +37,8 @@ uniform float shininess; // Specular surface colour
 
 vec4 overheadPhongDirLight(vec4 position, vec3 norm, vec4 c){
 
-	vec3 lightDir   = normalize(vec3(0.0,100.0,0.0) - position.xyz);
+	//vec3 lightDir   = normalize(vec3(0.0,100.0,0.0) - position.xyz);
+	vec3 lightDir   = normalize(-vec3(0.0,-1.0,0.0));
 	vec3 viewDir    = normalize(camPos-position.xyz);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float sDotN = max( dot(lightDir , norm ), 0.0 );
@@ -200,7 +201,7 @@ void main(void){
 	vec4 ambient = getAmbient(mtl_ambient);
 	vec4 specular = getSpec(mtl_specular); */
 	
-	fragColour = overheadPhongDirLight(vec4(vertex,1.0), normalize(-normal),colour);
+	fragColour = 0.7 * overheadPhongDirLight(vec4(vertex,1.0), normalize(-normal),colour);
 	fragColour += lampLight(vec4(vertex,1.0), normalize(-normal),colour);
 	//fragColour = ambient + diffuse + specular;
 }
