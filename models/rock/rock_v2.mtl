@@ -1,7 +1,7 @@
 newmtl lambert2SG
 illum 4
 Kd 0.8 0.8 0.8
-Ka 0.4 0.4 0.4
+Ka 0.2 0.2 0.2
 Tf 1.00 1.00 1.00
 map_Kd rock_v2_obj_lambert2SG_BaseColor.png
 map_Ka rock_v2_obj_lambert2SG_Height.png

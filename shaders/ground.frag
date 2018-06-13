@@ -14,6 +14,8 @@ uniform bool enableTexMapSpec;
 
 uniform vec4 overheadlight_dir;
 uniform vec4 yellowlight_pos;
+uniform vec3 camPos;
+uniform vec3 lampPos;
 
 uniform int lightingMode;
 
@@ -31,62 +33,44 @@ uniform vec4 mtl_specular; // Specular surface colour
 
 uniform float shininess; // Specular surface colour
 
-vec4 getDiffuse(vec4 c){
-	vec3 norm = normalize(normal);
-	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	vec3 viewDir    = normalize(-vertex);
+vec4 overheadPhongDirLight(vec4 position, vec3 norm, vec4 c){
+
+	vec3 lightDir   = normalize(vec3(0.0,100.0,0.0) - position.xyz);
+	vec3 viewDir    = normalize(camPos-position.xyz);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float sDotN = max( dot(norm,halfwayDir), 0.0 );
-    vec4 diffuse = overheadlight_diffuse * c * sDotN;
-	return diffuse;
-}
-
-vec4 getAmbient(vec4 c){
-	vec4 ambient = overheadlight_ambient * c;
-	return ambient;
-}
-
-vec4 getSpec(vec4 c){
-	vec3 norm = normalize(normal);
-	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	vec3 viewDir    = normalize(-vertex);
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float sDotN = max( dot(norm, halfwayDir), 0.0 );
-	vec4 spec = vec4(0.0);
-    if ( sDotN > 0.0 ){
-		spec = overheadlight_specular * c * pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
-	}
-
-	return spec;
-}
-
-//accepts bool for if to texture on this pixel
-vec4 overheadPhongDirLight(bool isTextured, vec3 colour){
-	vec3 norm = normalize(normal);
-	vec3 lightDir   = normalize(-overheadlight_dir.xyz);
-	vec3 viewDir    = normalize(vec3(0.0, 0.0, 1.0) - vertex);
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-    
+	float sDotN = max( dot(lightDir , norm ), 0.0 );
+	
     vec4 ambient = overheadlight_ambient * mtl_ambient;
 	
     // The diffuse component
-    float sDotN = max( dot(norm,lightDir), 0.0 );
-    vec4 diffuse = overheadlight_diffuse * mtl_diffuse * sDotN;
+    //float sDotN = max( dot(lightDir,norm), 0.0 );
+    vec4 diffuse =  sDotN * overheadlight_diffuse * c;
 
     // The specular component
     vec4 spec = vec4(0.0);
     if ( sDotN > 0.0 )
-		spec = overheadlight_specular * mtl_specular *
-             pow( max( dot(norm,halfwayDir), 0.0 ), shininess );
-			 
-	if (isTextured){
-		//diffuse = diffuse * texture(texMap, st);
-	}
+		spec = pow( max( dot(norm,halfwayDir), 0.0 ), shininess ) * overheadlight_specular * mtl_specular ;
 	
-	if (isTextured){
-		//spec = spec * texture(texMapSpec, st);
-	}
+    return ( ambient + diffuse + spec );
+}
+
+vec4 lampLight(in vec4 position, in vec3 norm, vec4 c){
+
+	vec3 lightDir   = normalize(lampPos - position.xyz);
+	vec3 viewDir    = normalize(camPos-vertex.xyz);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float sDotN = max( dot(lightDir , norm ), 0.0 );
+    vec4 ambient = overheadlight_ambient * mtl_ambient;
 	
+    // The diffuse component
+    //float sDotN = max( dot(lightDir,norm), 0.0 );
+    vec4 diffuse =  sDotN * overheadlight_diffuse * c;
+
+    // The specular component
+    vec4 spec = vec4(0.0);
+    if ( sDotN > 0.0 )
+		spec = pow( max( dot(norm,halfwayDir), 0.0 ), shininess ) * overheadlight_specular * mtl_specular ;
+		
     return ( ambient + diffuse + spec );
 }
 
@@ -208,10 +192,12 @@ void main(void){
 		p = r*10;
 		colour = colour + vec4(snow*p, 1.0f);
 	}
-
+/* 
 	vec4 diffuse = getDiffuse(colour);
 	vec4 ambient = getAmbient(mtl_ambient);
-	vec4 specular = getSpec(mtl_specular);
-
-	fragColour = ambient + diffuse + specular;
+	vec4 specular = getSpec(mtl_specular); */
+	
+	fragColour = overheadPhongDirLight(vec4(vertex,1.0), normalize(-normal),colour);
+	fragColour += lampLight(vec4(vertex,1.0), normalize(-normal),colour);
+	//fragColour = ambient + diffuse + specular;
 }

@@ -21,10 +21,11 @@ class Camera{
 		void lookAt(glm::vec3);
 		glm::mat4 getView();
 		void reset();
-		void update(glm::vec3,glm::vec3);
+		void update(float, glm::vec3,glm::vec3);
 		void followPlane(glm::vec3);
 		void switchCam();
 		std::string type;
+		glm::vec3 camPos;
 	private:
 		glm::mat4 viewMtx;
 		glm::vec3 initEye;
