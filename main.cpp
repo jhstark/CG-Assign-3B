@@ -34,7 +34,7 @@ HeightMap *ground = new HeightMap(20.0f , "models/heightmap/Heightmap.png", 1.0f
 Water *water = new Water(100.0f, 1.0f);
 
 Plane *plane = new Plane(0.005);
-Object *rock = new Object( 0.05 , glm::vec3(1.0 , 0.0 , 0.0) , glm::vec3(0.0) );
+Object *rock = new Object( 0.05 , glm::vec3(1.0 , -0.1 , 0.0) , glm::vec3(0.0) );
 Object *cottage = new Object( 0.1 , glm::vec3(0.0 , 0.0 , -3.0) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
 Object *lampPost = new Object( 0.02 , glm::vec3(-0.65 , 0.0 , -2.5) , glm::vec3(0.0 , 0.0 , DEG2RAD(-90)) );
 Object *tree = new Object( 0.2 , glm::vec3(0.0) , glm::vec3(0.0 , DEG2RAD(-90) , 0.0) );

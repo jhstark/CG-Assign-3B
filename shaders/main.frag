@@ -118,6 +118,7 @@ vec3 headBlingPhongPointLight(in vec4 position, in vec3 norm){
 } */
 
 mat3 calcTBN(){
+	// Thanks to https://stackoverflow.com/questions/5255806/how-to-calculate-tangent-and-binormal
 	// derivations of the fragment position
 	vec3 pos_dx = dFdx( vec3(vertex) );
 	vec3 pos_dy = dFdy( vec3(vertex) );
