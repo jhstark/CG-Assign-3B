@@ -58,7 +58,7 @@ void loadShaders(){
 	programIdMap["main"] = LoadShaders("shaders/main.vert", "shaders/main.frag");
 	programIdMap["skybox"] = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
 	programIdMap["ground"] = LoadShaders("shaders/ground.vert", "shaders/ground.frag");
-	programIdMap["fog"] = LoadShaders("shaders/fog.vert", "shaders/fog.frag");
+	//programIdMap["fog"] = LoadShaders("shaders/fog.vert", "shaders/fog.frag");
 	programIdMap["water"] = LoadShaders("shaders/water.vert", "shaders/water.frag");
 	// Check for errors across the shaders
 	for (std::map<std::string,int>::iterator item=programIdMap.begin(); item!=programIdMap.end(); ++item){
@@ -647,27 +647,27 @@ void renderSkyBox(){
 }
 
 //Author: Alex Waters
-void renderFog() {
-	int programId = programIdMap["fog"];
-	glUseProgram(programId);
+//void renderFog() {
+// 	int programId = programIdMap["fog"];
+// 	glUseProgram(programId);
 	
-	GLint fogHandle = glGetUniformLocation(programId, "vertex");
-	glUniform1i(fogHandle,0);
+// 	GLint fogHandle = glGetUniformLocation(programId, "vertex");
+// 	glUniform1i(fogHandle,0);
 
-	GLfloat fogColor[4] = {0.0, 0.0, 0.0, 1.0};
+// 	GLfloat fogColor[4] = {0.0, 0.0, 0.0, 1.0};
 
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_LINEAR);
-    glHint(GL_FOG_HINT, GL_NICEST);
-    glFogf(GL_FOG_START, 3.0);
-    glFogf(GL_FOG_END, 5.0);
-    glFogfv(GL_FOG_COLOR, fogColor);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+//     glEnable(GL_FOG);
+//     glFogi(GL_FOG_MODE, GL_LINEAR);
+//     glHint(GL_FOG_HINT, GL_NICEST);
+//     glFogf(GL_FOG_START, 3.0);
+//     glFogf(GL_FOG_END, 5.0);
+//     glFogfv(GL_FOG_COLOR, fogColor);
+//     glClearColor(0.0, 0.0, 0.0, 1.0);
 
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_DEPTH_TEST);
-    glShadeModel(GL_FLAT);
-}
+//     glDepthFunc(GL_LEQUAL);
+//     glEnable(GL_DEPTH_TEST);
+//     glShadeModel(GL_FLAT);
+// }
 
 //Author: Jordan Hoskin-Stark and Brittany Reid
 void render( double dt ){
@@ -723,7 +723,7 @@ void render( double dt ){
 	toCheck.push_back(*lampPost);
 	handleCollision();
 	
-	renderFog();
+	//renderFog();
 	
 	glFlush();
 
